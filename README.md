@@ -1,4 +1,6 @@
 # stm32-nucleo-l432kc-demo
+![build status](https://github.com/stgloorious/stm32-nucleo-l432kc-demo/actions/workflows/cmake-single-platform.yml/badge.svg)
+
 Demo project showing my setup for STM32 microcontrollers without STM32CubeIDE.
 This demo targets the STM32 NUCLEO-L432KC board (STM32L432KC).
 

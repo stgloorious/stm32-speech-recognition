@@ -18,21 +18,21 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-       submodules: recursive
-
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build
-
-    - uses: actions/checkout@v3
-      with:
         ssh-key: ${{ secrets.XTOOLS }}
         repository: stgloorious/x-tools
 
     - name: Install toolchain
       run: sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc /usr/bin/arm-homemade-eabihf-gcc &&
            sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump /usr/bin/arm-homemade-eabihf-objdump
+           
+    - uses: actions/checkout@v3
+      with:
+       submodules: recursive
+
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: cmake -B ${{github.workspace}}/build
 
     - name: Build
       # Build your program with the given configuration

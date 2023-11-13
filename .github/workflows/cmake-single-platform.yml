@@ -25,10 +25,11 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: cmake -B ${{github.workspace}}/build
 
-    - name: Get toolchain
-      run: eval `ssh-agent -s`
-           ssh-add - <<< '${{ secrets.xtools }}'
-           git clone git@github.com:stgloorious/x-tools.git
+    - name: Get secret
+      run: eval `ssh-agent -s` && ssh-add - <<< '${{ secrets.xtools }}'
+           
+    - name: Clone toolchain
+      run: git clone git@github.com:stgloorious/x-tools.git
            sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc /usr/bin/arm-homemade-eabihf-gcc
            sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump /usr/bin/arm-homemade-eabihf-objdump
 

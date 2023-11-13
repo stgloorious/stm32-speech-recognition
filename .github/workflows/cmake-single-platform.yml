@@ -20,27 +20,17 @@ jobs:
       with:
        submodules: recursive
        
-    - name: Clone Toolchain
+    - name: Build
       run: |
            eval `ssh-agent -s`
            ssh-add - <<< '${{ secrets.XTOOLS }}'
            echo $hostname
            whoami
            git clone git@github.com:stgloorious/x-tools.git
-
-    - name: Install toolchain
-      run: |
            sudo ln -s ${HOME}/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc ${HOME}/arm-homemade-eabihf-gcc
            sudo ln -s ${HOME}/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump ${HOME}/arm-homemade-eabihf-objdump
            echo "${HOME}" >> ${GITHUB_PATH}
-           
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build
-
-    - name: Build
-      # Build your program with the given configuration
-      run: make -C ${{github.workspace}}/build
+           cmake -B build
+           make -C ${{github.workspace}}/build
 
 

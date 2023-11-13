@@ -50,7 +50,7 @@ Ozone can also directly flash the STM32L432KC, so no need for the ST-Link tools.
 ## Build
 Make sure you cloned the whole repository including the submodules.
 ~~~
-git clone --recurse-submodules
+git clone --recursive https://github.com/stgloorious/stm32-nucleo-l432kc-demo.git
 ~~~
 
 To compile, run CMake

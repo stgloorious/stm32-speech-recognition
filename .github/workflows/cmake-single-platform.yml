@@ -27,8 +27,9 @@ jobs:
            git clone git@github.com:stgloorious/x-tools.git
            echo "$(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc" >> ${GITHUB_PATH}
            echo "$(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump" >> ${GITHUB_PATH}
-           ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc arm-homemade-eabihf-gcc
-           ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump arm-homemade-eabihf-objdump
+           sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc /usr/bin/arm-homemade-eabihf-gcc
+           sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump /usr/bin/arm-homemade-eabihf-objdump
+           arm-homemade-eabihf-gcc -v
            ls -lah
            cmake -B build
            make -C ${{github.workspace}}/build

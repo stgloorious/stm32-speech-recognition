@@ -1,5 +1,5 @@
 /*
- * main.c
+ * debug_io.h
  *
  * Copyright (C) 2023 Stefan Gloor
  *
@@ -26,40 +26,4 @@
  *
  */
 
-#include "stm32l4xx_hal.h"
-#include "stm32l4xx_nucleo_32.h"
-
-#include "clock.h"
-#include "debug_io.h"
-
-#include <stdio.h>
-#include <string.h>
-
-int main(void)
-{
-	setvbuf(stdin, NULL, _IONBF, 0);
-	setvbuf(stdout, NULL, _IONBF, 0);
-	setvbuf(stderr, NULL, _IONBF, 0);
-
-	HAL_Init();
-
-	SystemClock_Config();
-
-	BSP_LED_Init(LED3);
-
-	uart_debug_init();
-
-	printf("\n\n");
-	printf("STM32 NUCLEO-K432KC Demo Application Version 1.0\n");
-	printf("Build date: %s %s\n", __DATE__, __TIME__);
-	printf("GCC %i.%i.%i ", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-	printf("Newlib %s\n\n", _NEWLIB_VERSION);
-
-
-	while (1) {
-		BSP_LED_Toggle(LED3);
-		printf("Hello World!\n");
-
-		HAL_Delay(1000);
-	}
-}
+void uart_debug_init();

@@ -1,5 +1,5 @@
 /*
- * main.c
+ * clock.c
  *
  * Copyright (C) 2023 Stefan Gloor
  *
@@ -26,40 +26,33 @@
  *
  */
 
-#include "stm32l4xx_hal.h"
-#include "stm32l4xx_nucleo_32.h"
-
 #include "clock.h"
-#include "debug_io.h"
+#include "stm32l4xx_hal.h"
 
-#include <stdio.h>
-#include <string.h>
-
-int main(void)
+void SystemClock_Config(void)
 {
-	setvbuf(stdin, NULL, _IONBF, 0);
-	setvbuf(stdout, NULL, _IONBF, 0);
-	setvbuf(stderr, NULL, _IONBF, 0);
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
+	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
 
-	HAL_Init();
+	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSI;
+	RCC_OscInitStruct.MSIState = RCC_MSI_ON;
+	RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_6;
+	RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
+	RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+	RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
+	RCC_OscInitStruct.PLL.PLLM = 1;
+	RCC_OscInitStruct.PLL.PLLN = 40;
+	RCC_OscInitStruct.PLL.PLLR = 2;
+	RCC_OscInitStruct.PLL.PLLP = 7;
+	RCC_OscInitStruct.PLL.PLLQ = 4;
+	HAL_RCC_OscConfig(&RCC_OscInitStruct);
 
-	SystemClock_Config();
-
-	BSP_LED_Init(LED3);
-
-	uart_debug_init();
-
-	printf("\n\n");
-	printf("STM32 NUCLEO-K432KC Demo Application Version 1.0\n");
-	printf("Build date: %s %s\n", __DATE__, __TIME__);
-	printf("GCC %i.%i.%i ", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-	printf("Newlib %s\n\n", _NEWLIB_VERSION);
-
-
-	while (1) {
-		BSP_LED_Toggle(LED3);
-		printf("Hello World!\n");
-
-		HAL_Delay(1000);
-	}
+	RCC_ClkInitStruct.ClockType =
+		(RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK |
+		 RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4);
 }

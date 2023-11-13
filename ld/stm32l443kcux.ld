@@ -40,8 +40,8 @@ ENTRY(Reset_Handler)
 /* Highest address of the user mode stack */
 _estack = ORIGIN(RAM) + LENGTH(RAM); /* end of "RAM" Ram type memory */
 
-_Min_Heap_Size = 0x9000; /* required amount of heap */
-_Min_Stack_Size = 0x4000; /* required amount of stack */
+_Min_Heap_Size = 0x0200; /* required amount of heap */
+_Min_Stack_Size = 0x0400; /* required amount of stack */
 
 /* Memories definition */
 MEMORY
@@ -78,6 +78,7 @@ SECTIONS
 
     . = ALIGN(4);
     _etext = .;        /* define a global symbols at end of code */
+    __end__ = _etext;
   } >ROM
 
   /* Constant data into "ROM" Rom type memory */

@@ -1,5 +1,5 @@
 /*
- * main.c
+ * interrupt.h
  *
  * Copyright (C) 2023 Stefan Gloor
  *
@@ -26,40 +26,20 @@
  *
  */
 
-#include "stm32l4xx_hal.h"
-#include "stm32l4xx_nucleo_32.h"
+void NMI_Handler(void);
 
-#include "clock.h"
-#include "debug_io.h"
+void HardFault_Handler(void);
 
-#include <stdio.h>
-#include <string.h>
+void MemManage_Handler(void);
 
-int main(void)
-{
-	setvbuf(stdin, NULL, _IONBF, 0);
-	setvbuf(stdout, NULL, _IONBF, 0);
-	setvbuf(stderr, NULL, _IONBF, 0);
+void BusFault_Handler(void);
 
-	HAL_Init();
+void UsageFault_Handler(void);
 
-	SystemClock_Config();
+void SVC_Handler(void);
 
-	BSP_LED_Init(LED3);
+void DebugMon_Handler(void);
 
-	uart_debug_init();
+void PendSV_Handler(void);
 
-	printf("\n\n");
-	printf("STM32 NUCLEO-K432KC Demo Application Version 1.0\n");
-	printf("Build date: %s %s\n", __DATE__, __TIME__);
-	printf("GCC %i.%i.%i ", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-	printf("Newlib %s\n\n", _NEWLIB_VERSION);
-
-
-	while (1) {
-		BSP_LED_Toggle(LED3);
-		printf("Hello World!\n");
-
-		HAL_Delay(1000);
-	}
-}
+void SysTick_Handler(void);

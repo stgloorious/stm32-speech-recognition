@@ -1,5 +1,5 @@
 /*
- * main.c
+ * interrupts.c
  *
  * Copyright (C) 2023 Stefan Gloor
  *
@@ -26,40 +26,64 @@
  *
  */
 
+#include "interrupt.h"
 #include "stm32l4xx_hal.h"
-#include "stm32l4xx_nucleo_32.h"
-
-#include "clock.h"
-#include "debug_io.h"
 
 #include <stdio.h>
-#include <string.h>
 
-int main(void)
+void NMI_Handler(void)
 {
-	setvbuf(stdin, NULL, _IONBF, 0);
-	setvbuf(stdout, NULL, _IONBF, 0);
-	setvbuf(stderr, NULL, _IONBF, 0);
+}
 
-	HAL_Init();
+void MemManage_Handler(void)
+{
+	printf("==========================================\n");
+	printf("Unexpected Interrupt: %s\n", " MemManage");
+	printf("==========================================\n");
+	while (1)
+		;
+}
 
-	SystemClock_Config();
+void BusFault_Handler(void)
+{
+	printf("==========================================\n");
+	printf("Unexpected Interrupt: %s\n", "  BusFault");
+	printf("==========================================\n");
+	while (1)
+		;
+}
 
-	BSP_LED_Init(LED3);
+void UsageFault_Handler(void)
+{
+	printf("==========================================\n");
+	printf("Unexpected Interrupt: %s\n", "UsageFault");
+	printf("==========================================\n");
+	while (1)
+		;
+}
 
-	uart_debug_init();
+void HardFault_Handler(void)
+{
+	printf("==========================================\n");
+	printf("Unexpected Interrupt: %s\n", " HardFault");
+	printf("==========================================\n");
+	while (1)
+		;
+}
 
-	printf("\n\n");
-	printf("STM32 NUCLEO-K432KC Demo Application Version 1.0\n");
-	printf("Build date: %s %s\n", __DATE__, __TIME__);
-	printf("GCC %i.%i.%i ", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-	printf("Newlib %s\n\n", _NEWLIB_VERSION);
+void SVC_Handler(void)
+{
+}
 
+void DebugMon_Handler(void)
+{
+}
 
-	while (1) {
-		BSP_LED_Toggle(LED3);
-		printf("Hello World!\n");
+void PendSV_Handler(void)
+{
+}
 
-		HAL_Delay(1000);
-	}
+void SysTick_Handler(void)
+{
+	HAL_IncTick();
 }

@@ -18,13 +18,14 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
+        working-directory: ${HOME}
         ssh-key: ${{ secrets.XTOOLS }}
         repository: stgloorious/x-tools
 
     - name: Install toolchain
-      run: sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc /usr/bin/arm-homemade-eabihf-gcc &&
-           sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump /usr/bin/arm-homemade-eabihf-objdump &&
-           echo "/usr/bin/" >> ${GITHUB_PATH}
+      run: sudo ln -s ${HOME}/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc ${HOME}/arm-homemade-eabihf-gcc &&
+           sudo ln -s ${HOME}/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump ${HOME}/arm-homemade-eabihf-objdump &&
+           echo "${HOME}" >> ${GITHUB_PATH}
            
     - uses: actions/checkout@v3
       with:

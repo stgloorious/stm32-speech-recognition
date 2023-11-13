@@ -1,3 +1,2 @@
 file build/demo.elf
 target remote :4242
-hbreak main

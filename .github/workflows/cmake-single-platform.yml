@@ -24,12 +24,8 @@ jobs:
       run: |
            eval `ssh-agent -s`
            ssh-add - <<< '${{ secrets.XTOOLS }}'
-           echo $hostname
-           whoami
            git clone git@github.com:stgloorious/x-tools.git
-           sudo ln -s ${HOME}/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc ${HOME}/arm-homemade-eabihf-gcc
-           sudo ln -s ${HOME}/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump ${HOME}/arm-homemade-eabihf-objdump
-           echo "${HOME}" >> ${GITHUB_PATH}
+           echo "x-tools/arm-homemade-eabihf/bin" >> ${GITHUB_PATH}
            cmake -B build
            make -C ${{github.workspace}}/build
 

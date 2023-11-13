@@ -22,15 +22,6 @@ jobs:
        
     - name: Build
       run: |
-           wget -c https://ftp.gnu.org/gnu/glibc/glibc-2.37.tar.gz
-           tar -zxf glibc-2.37.tar.gz
-           mkdir glibc-2.37/build
-           cd glibc-2.37/build
-           ../configure --disable-sanity-checks
-           make 
-           sudo make install
-           sudo ldconfig
-           ldd --version
            eval `ssh-agent -s`
            ssh-add - <<< '${{ secrets.XTOOLS }}'
            git clone git@github.com:stgloorious/x-tools.git
@@ -38,7 +29,6 @@ jobs:
            echo "$(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump" >> ${GITHUB_PATH}
            sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc /usr/bin/arm-homemade-eabihf-gcc
            sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump /usr/bin/arm-homemade-eabihf-objdump
-           ls -lah
            arm-homemade-eabihf-gcc -v
            cmake -B build
            make -C ${{github.workspace}}/build

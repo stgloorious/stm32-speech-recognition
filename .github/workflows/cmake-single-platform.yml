@@ -23,10 +23,10 @@ jobs:
     - name: Build
       run: |
            wget -c https://ftp.gnu.org/gnu/glibc/glibc-2.37.tar.gz
-           tar -zxvf glibc-2.37.tar.gz
+           tar -zxv glibc-2.37.tar.gz
            mkdir glibc-2.37/build
            cd glibc-2.37/build
-           ../configure
+           ../configure --disable-sanity-checks
            make 
            sudo make install
            sudo ldconfig

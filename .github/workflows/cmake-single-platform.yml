@@ -26,10 +26,11 @@ jobs:
       run: cmake -B ${{github.workspace}}/build
 
     - name: Get toolchain
-      run: eval `ssh-agent -s` && ssh-add - <<< '${{ secrets.xtools }}'
-           cd /home/runner && git clone git@github.com:stgloorious/x-tools.git 
-           sudo ln -s /home/runner/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc /usr/bin/arm-homemade-eabihf-gcc
-           sudo ln -s /home/runner/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump /usr/bin/arm-homemade-eabihf-objdump
+      run: eval `ssh-agent -s`
+           ssh-add - <<< '${{ secrets.xtools }}'
+           git clone git@github.com:stgloorious/x-tools.git
+           sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc /usr/bin/arm-homemade-eabihf-gcc
+           sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump /usr/bin/arm-homemade-eabihf-objdump
 
     - name: Build
       # Build your program with the given configuration

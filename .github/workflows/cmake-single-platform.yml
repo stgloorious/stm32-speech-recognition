@@ -25,7 +25,9 @@ jobs:
            eval `ssh-agent -s`
            ssh-add - <<< '${{ secrets.XTOOLS }}'
            git clone git@github.com:stgloorious/x-tools.git
-           echo "x-tools/arm-homemade-eabihf/bin" >> ${GITHUB_PATH}
+           echo "x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc" >> ${GITHUB_PATH}
+           echo "x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump" >> ${GITHUB_PATH}
+           ls -lah
            cmake -B build
            make -C ${{github.workspace}}/build
 

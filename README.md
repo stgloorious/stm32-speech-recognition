@@ -4,7 +4,7 @@
 Demo project showing my setup for STM32 microcontrollers without STM32CubeIDE.
 This demo targets the STM32 NUCLEO-L432KC board (STM32L432KC).
 
- - Modular setup: HAL drivers are fetched from upstream repositories and separate from user code.
+ - Modular setup: HAL drivers are fetched from upstream repositories and are separate from user code.
  - [newlib](https://sourceware.org/newlib/) as libc implementation, built with FPU support
  - UART debug console as `stdout`/`stderr`: Support for `printf()`, assertions, exceptions etc.
  - CMake build system

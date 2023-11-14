@@ -26,10 +26,7 @@ jobs:
            ssh-add - <<< '${{ secrets.XTOOLS }}'
            git clone git@github.com:stgloorious/x-tools.git
            echo "$(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc" >> ${GITHUB_PATH}
-           echo "$(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump" >> ${GITHUB_PATH}
-           sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-gcc /usr/bin/arm-homemade-eabihf-gcc
-           sudo ln -s $(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objdump /usr/bin/arm-homemade-eabihf-objdump
-           arm-homemade-eabihf-gcc -v
+           echo "$(pwd)/x-tools/arm-homemade-eabihf/bin/arm-homemade-eabihf-objcopy" >> ${GITHUB_PATH}
            cmake -B build
            make -C ${{github.workspace}}/build
 

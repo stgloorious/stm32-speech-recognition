@@ -5,7 +5,7 @@ Demo project showing my setup for STM32 microcontrollers without STM32CubeIDE, b
 This demo targets the STM32 NUCLEO-L432KC board (STM32L432KC), which contains an ARM Cortex-M4 CPU.
 
  - Modular setup: HAL drivers are fetched from upstream repositories and are separate from application code.
- - CMake build system: transparent and easy to use with CI/CD.
+ - CMake build system: transparent and easy to use with your favorite editor or CI/CD.
  - No need to install a GUI IDE or other unnecessary dependencies: use only what you want/need.
  - [newlib](https://sourceware.org/newlib/) as libc implementation, built with FPU support.
  - UART debug console as `stdout`/`stderr`: Support for `printf()`, assertions, exceptions etc.

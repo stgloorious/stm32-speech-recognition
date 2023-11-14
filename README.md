@@ -35,7 +35,7 @@ in errors like these:
 ~~~
 <executable> uses VFP register arguments, <libc> does not
 ~~~
-regardless of settings flags `-nostdlib`.
+regardless of flags like `-nostdlib`.
 
 The STM32F432KC ARM Cortex-M4 does have hardware support for `float` (single-precision)
 arithmetic, so it makes sense to use the right toolchain/libc.

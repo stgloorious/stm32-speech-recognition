@@ -55,7 +55,6 @@ int main(void)
 	printf("GCC %i.%i.%i ", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 	printf("Newlib %s\n\n", _NEWLIB_VERSION);
 
-
 	while (1) {
 		BSP_LED_Toggle(LED3);
 		printf("Hello World!\n");

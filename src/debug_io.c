@@ -91,7 +91,6 @@ void uart_debug_init()
 	uart_hd_debug_uart.Init.HwFlowCtl = UART_HWCONTROL_NONE;
 	uart_hd_debug_uart.Init.Mode = UART_MODE_TX_RX;
 	uart_hd_debug_uart.Init.OverSampling = UART_OVERSAMPLING_16;
-//	uart_hd_debug_uart.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
 
 	if (HAL_UART_DeInit(&uart_hd_debug_uart) != HAL_OK) {
 		while (1)

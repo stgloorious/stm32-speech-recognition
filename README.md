@@ -1,13 +1,13 @@
-# stm32-nucleo-l432kc-demo
+# Bare Metal STM32 Setup without STM32CubeIDE
 ![build status](https://github.com/stgloorious/stm32-nucleo-l432kc-demo/actions/workflows/cmake-single-platform.yml/badge.svg)
 
-Demo project showing my setup for STM32 microcontrollers without STM32CubeIDE.
-This demo targets the STM32 NUCLEO-L432KC board (STM32L432KC).
+Demo project showing my setup for STM32 microcontrollers without STM32CubeIDE, but with the HAL drivers.
+This demo targets the STM32 NUCLEO-L432KC board (STM32L432KC). This is an ARM Cortex-M4 CPU.
 
- - Modular setup: HAL drivers are fetched from upstream repositories and are separate from user code.
- - [newlib](https://sourceware.org/newlib/) as libc implementation, built with FPU support
+ - Modular setup: HAL drivers are fetched from upstream repositories and are separate from application code.
+ - [newlib](https://sourceware.org/newlib/) as libc implementation, built with FPU support.
  - UART debug console as `stdout`/`stderr`: Support for `printf()`, assertions, exceptions etc.
- - CMake build system
+ - CMake build system.
 
 Example Output:
  ~~~
@@ -25,28 +25,39 @@ Hello World!
 
 ## Dependencies
 ### Toolchain
-I built the toolchain with [crosstool-NG](https://crosstool-ng.github.io/).
-The main reason for this is that I had problems selecting a `libc.a` with
+I built a toolchain with [crosstool-NG](https://crosstool-ng.github.io/)
+which was tailored to the STM32 by using `-mcpu=cortex-m4`, `-mfloat-abi=hard` and `mfpu=fpv4-sp-d16`.
+The main reason for this is that I had problems linking against libc with
 hard-float support using the standard
-[arm-none-eabi](https://developer.arm.com/Tools%20and%20Software/GNU%20Toolchain).
-The STM32F432KC Cortex-M4 does have hardware support for `float` (single-precision)
+[arm-none-eabi](https://developer.arm.com/Tools%20and%20Software/GNU%20Toolchain),
+as it would always link against the standard (soft float) libc, resulting
+in errors like these:
+~~~
+<executable> uses VFP register arguments, <libc> does not
+~~~
+regardless of settings flags `-nostdlib`.
+
+The STM32F432KC ARM Cortex-M4 does have hardware support for `float` (single-precision)
 arithmetic, so it makes sense to use the right toolchain/libc.
 
-1. [Download crosstool-NG](https://crosstool-ng.github.io/download/).
+To build the toolchain:
+
+1. [Download crosstool-NG](https://crosstool-ng.github.io/download/) and install it.
 2. Copy `toolchain.config` to `.config`
 3. Run `ct-ng oldconfig` to update, `ct-ng menuconfig` to review and `ct-ng build` to build the toolchain.
 4. After successful build, make sure the binaries are in your `$PATH`
 
 ### Debugging & Loader
-To upload the binary to the board I use
+To upload the final binary to the board I use
 the [STM32 programming toolset](https://github.com/stlink-org/stlink).
 To start a GDB server, I use `st-util --connect-under-reset`.
-This makes the most sense when using the on-board ST-Link on the Nucleo development
+This makes the most sense when using the on-board ST-Link on the NUCLEO development
 board.
 
-However, sometimes it's also nice to have a graphical debugger, for which I use
+However, sometimes it's also nice to have a more capable graphical debugger, for which I use
 [Ozone](https://www.segger.com/products/development-tools/ozone-j-link-debugger/)
-with a SEGGER j-link Plus connected over SWD.
+with a SEGGER J-Link Plus connected over SWD. I also tried enabling tracing via the SWO pin, 
+but could not get it to work.
 Ozone can also directly flash the STM32L432KC, so no need for the ST-Link tools.
 
 ## Build

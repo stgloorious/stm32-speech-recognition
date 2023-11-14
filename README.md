@@ -2,7 +2,7 @@
 ![build status](https://github.com/stgloorious/stm32-nucleo-l432kc-demo/actions/workflows/cmake-single-platform.yml/badge.svg)
 
 Demo project showing my setup for STM32 microcontrollers without STM32CubeIDE, but with the HAL drivers.
-This demo targets the STM32 NUCLEO-L432KC board (STM32L432KC). This is an ARM Cortex-M4 CPU.
+This demo targets the STM32 NUCLEO-L432KC board (STM32L432KC), which contains an ARM Cortex-M4 CPU.
 
  - Modular setup: HAL drivers are fetched from upstream repositories and are separate from application code.
  - [newlib](https://sourceware.org/newlib/) as libc implementation, built with FPU support.

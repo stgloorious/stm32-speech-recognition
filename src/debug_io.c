@@ -50,11 +50,18 @@ int _write(int fd, const void *buf, int cnt)
 {
 	if (fd == STDOUT_FILENO || fd == STDERR_FILENO) {
 		if (HAL_UART_Transmit(&uart_hd_debug_uart, (uint8_t *)buf, cnt,
-				      100) == HAL_OK) {
-			return cnt;
+				      100) != HAL_OK) {
+			return -1;
 		}
+#ifndef CONFIG_DEBUG_NOCR
+        /* check whether the last character was a newline,
+         * and add a carriage return if it is */
+        if (*(uint8_t*)(buf + cnt - 1) == '\n'){
+            _write(fd, "\r", 1);
+        }
+#endif
 	}
-	return -1;
+	return cnt;
 }
 int _read(int fd, uint8_t *buf, int cnt)
 {

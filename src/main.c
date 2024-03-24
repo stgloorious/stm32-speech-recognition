@@ -55,12 +55,7 @@ int main(void)
 	}
 
 	/* Configure and start the necessary clocks and PLLs */
-	if (SystemClock_Config()) {
-		/* As configuration is not completed yet,
-		* this message might not make it out.
-		* Try anyway. */
-		ERR("SystemClock_Config() failed.\n");
-	}
+	SystemClock_Config();
 
 	BSP_LED_Init(LED3);
 

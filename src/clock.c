@@ -32,7 +32,7 @@
 #include "clock.h"
 #include "stm32l4xx_hal.h"
 
-int SystemClock_Config(void)
+void SystemClock_Config(void)
 {
 	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
@@ -49,7 +49,7 @@ int SystemClock_Config(void)
 	RCC_OscInitStruct.PLL.PLLP = 7;
 	RCC_OscInitStruct.PLL.PLLQ = 4;
 	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
-		return -1;
+		ERR("Configuring oscillator failed.\n");
 	}
 
 	RCC_ClkInitStruct.ClockType =
@@ -61,7 +61,6 @@ int SystemClock_Config(void)
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) !=
 	    HAL_OK) {
-		return -1;
+		ERR("Configuring clocks failed.\n");
 	}
-	return 0;
 }

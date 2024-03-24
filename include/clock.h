@@ -31,6 +31,5 @@
 
 /**
  * @brief Initialize system clocks
- * @return 0 on success
  */
-int SystemClock_Config(void);
+void SystemClock_Config(void);

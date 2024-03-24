@@ -49,16 +49,16 @@ int main(void)
 	/* Initialize the hardware abstraction library */
 	if (HAL_Init() != HAL_OK) {
 		/* As configuration is not completed yet,
-     * this message might not make it out.
-     * Try anyway. */
+		* this message might not make it out.
+		* Try anyway. */
 		ERR("HAL_Init() failed.\n");
 	}
 
 	/* Configure and start the necessary clocks and PLLs */
 	if (SystemClock_Config()) {
 		/* As configuration is not completed yet,
-     * this message might not make it out.
-     * Try anyway. */
+		* this message might not make it out.
+		* Try anyway. */
 		ERR("SystemClock_Config() failed.\n");
 	}
 

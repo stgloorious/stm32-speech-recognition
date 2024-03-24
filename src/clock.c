@@ -1,7 +1,10 @@
+/**
+ * @file clock.c
+ * @brief System clock configuration
+ */
+
 /*
- * clock.c
- *
- * Copyright (C) 2023 Stefan Gloor
+ * Copyright (C) 2024 Stefan Gloor
  *
  * SPDX-License-Identifier: MIT
  *
@@ -29,7 +32,7 @@
 #include "clock.h"
 #include "stm32l4xx_hal.h"
 
-void SystemClock_Config(void)
+int SystemClock_Config(void)
 {
 	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
@@ -45,7 +48,9 @@ void SystemClock_Config(void)
 	RCC_OscInitStruct.PLL.PLLR = 2;
 	RCC_OscInitStruct.PLL.PLLP = 7;
 	RCC_OscInitStruct.PLL.PLLQ = 4;
-	HAL_RCC_OscConfig(&RCC_OscInitStruct);
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+		return -1;
+	}
 
 	RCC_ClkInitStruct.ClockType =
 		(RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK |
@@ -54,5 +59,9 @@ void SystemClock_Config(void)
 	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-	HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4);
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) !=
+	    HAL_OK) {
+		return -1;
+	}
+	return 0;
 }

@@ -1,7 +1,9 @@
-/*
- * debug_io.h
- *
- * Copyright (C) 2023 Stefan Gloor
+/**
+ * @file debug_io.h
+ * @brief Initialize UART for use with printf
+ */
+
+/* Copyright (C) 2024 Stefan Gloor
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,4 +28,8 @@
  *
  */
 
-void uart_debug_init();
+/**
+ * @brief Initialize UART and attach to printf
+ * @return 0 on success
+ */
+int uart_debug_init();

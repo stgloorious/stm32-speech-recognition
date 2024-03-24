@@ -1,7 +1,10 @@
+/**
+ * @file interrupts.c
+ * @brief Exception handlers
+ */
+
 /*
- * interrupts.c
- *
- * Copyright (C) 2023 Stefan Gloor
+ * Copyright (C) 2024 Stefan Gloor
  *
  * SPDX-License-Identifier: MIT
  *
@@ -37,36 +40,44 @@ void NMI_Handler(void)
 
 void MemManage_Handler(void)
 {
+#ifdef DEBUG
 	printf("==========================================\n");
 	printf("Unexpected Interrupt: %s\n", " MemManage");
 	printf("==========================================\n");
+#endif
 	while (1)
 		;
 }
 
 void BusFault_Handler(void)
 {
+#ifdef DEBUG
 	printf("==========================================\n");
 	printf("Unexpected Interrupt: %s\n", "  BusFault");
 	printf("==========================================\n");
+#endif
 	while (1)
 		;
 }
 
 void UsageFault_Handler(void)
 {
+#ifdef DEBUG
 	printf("==========================================\n");
 	printf("Unexpected Interrupt: %s\n", "UsageFault");
 	printf("==========================================\n");
+#endif
 	while (1)
 		;
 }
 
 void HardFault_Handler(void)
 {
+#ifdef DEBUG
 	printf("==========================================\n");
 	printf("Unexpected Interrupt: %s\n", " HardFault");
 	printf("==========================================\n");
+#endif
 	while (1)
 		;
 }

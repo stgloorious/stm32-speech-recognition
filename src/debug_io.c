@@ -1,8 +1,9 @@
-/* 
- * debug_io.c
- * Initializes UART2 to be used as a debug UART port.
- * 
- * Copyright (C) 2023 Stefan Gloor
+/**
+ * @file debug_io.c
+ * @brief Initializes UART to be used as a debug UART port.
+ */
+
+/* Copyright (C) 2024 Stefan Gloor
  *
  * SPDX-License-Identifier: MIT
  *
@@ -54,15 +55,16 @@ int _write(int fd, const void *buf, int cnt)
 			return -1;
 		}
 #ifndef CONFIG_DEBUG_NOCR
-        /* check whether the last character was a newline,
+		/* check whether the last character was a newline,
          * and add a carriage return if it is */
-        if (*(uint8_t*)(buf + cnt - 1) == '\n'){
-            _write(fd, "\r", 1);
-        }
+		if (*(uint8_t *)(buf + cnt - 1) == '\n') {
+			_write(fd, "\r", 1);
+		}
 #endif
 	}
 	return cnt;
 }
+
 int _read(int fd, uint8_t *buf, int cnt)
 {
 	/* wait as long as fifo is empty */
@@ -84,7 +86,7 @@ int _read(int fd, uint8_t *buf, int cnt)
 	return i;
 }
 
-void uart_debug_init()
+int uart_debug_init()
 {
 	__HAL_RCC_USART2_CLK_ENABLE();
 	__HAL_RCC_GPIOA_CLK_ENABLE();
@@ -100,12 +102,10 @@ void uart_debug_init()
 	uart_hd_debug_uart.Init.OverSampling = UART_OVERSAMPLING_16;
 
 	if (HAL_UART_DeInit(&uart_hd_debug_uart) != HAL_OK) {
-		while (1)
-			;
+		return -1;
 	}
 	if (HAL_UART_Init(&uart_hd_debug_uart) != HAL_OK) {
-		while (1)
-			;
+		return -1;
 	}
 
 	GPIO_InitTypeDef GPIO_InitStruct;
@@ -131,6 +131,7 @@ void uart_debug_init()
 
 	HAL_UART_Receive_IT(&uart_hd_debug_uart,
 			    uart_rx_fifo + uart_rx_fifo_enqueue, 1);
+	return 0;
 }
 
 void USART2_IRQHandler()

@@ -1,7 +1,10 @@
+/**
+ * @file main.c
+ * @brief Demo application
+ */
+
 /*
- * main.c
- *
- * Copyright (C) 2023 Stefan Gloor
+ * Copyright (C) 2024 Stefan Gloor
  *
  * SPDX-License-Identifier: MIT
  *
@@ -31,19 +34,33 @@
 
 #include "clock.h"
 #include "debug_io.h"
+#include "error.h"
 
 #include <stdio.h>
 #include <string.h>
 
 int main(void)
 {
+	/* Disable buffering */
 	setvbuf(stdin, NULL, _IONBF, 0);
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
 
-	HAL_Init();
+	/* Initialize the hardware abstraction library */
+	if (HAL_Init() != HAL_OK) {
+		/* As configuration is not completed yet,
+     * this message might not make it out.
+     * Try anyway. */
+		ERR("HAL_Init() failed.\n");
+	}
 
-	SystemClock_Config();
+	/* Configure and start the necessary clocks and PLLs */
+	if (SystemClock_Config()) {
+		/* As configuration is not completed yet,
+     * this message might not make it out.
+     * Try anyway. */
+		ERR("SystemClock_Config() failed.\n");
+	}
 
 	BSP_LED_Init(LED3);
 
@@ -55,10 +72,18 @@ int main(void)
 	printf("GCC %i.%i.%i ", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 	printf("Newlib %s\n\n", _NEWLIB_VERSION);
 
+	HAL_Delay(1000);
+
+	printf("Hello World!\n");
+
 	while (1) {
 		BSP_LED_Toggle(LED3);
-		printf("Hello World!\n");
-
-		HAL_Delay(1000);
+		HAL_Delay(100);
+		BSP_LED_Toggle(LED3);
+		HAL_Delay(100);
+		BSP_LED_Toggle(LED3);
+		HAL_Delay(100);
+		BSP_LED_Toggle(LED3);
+		HAL_Delay(500);
 	}
 }

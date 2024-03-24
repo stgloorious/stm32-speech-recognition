@@ -17,11 +17,6 @@ Build date: Nov 13 2023 20:39:27
 GCC 13.2.0 Newlib 4.3.0
 
 Hello World!
-Hello World!
-Hello World!
-Hello World!
-Hello World!
-Hello World!
  ~~~
 
 ## Dependencies

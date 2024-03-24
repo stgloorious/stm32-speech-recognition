@@ -33,7 +33,7 @@
 /**
 * @brief Wrapper macro, set to (void) in production
 */
-#define ERR(file, line, msg) error_Handler(file, line, msg)
+#define ERR(msg) error_Handler(__FILE__, __LINE__, msg)
 #else
 #define ERR(file, line, msg) \
 	(void)file;          \

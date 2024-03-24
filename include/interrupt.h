@@ -1,7 +1,10 @@
+/**
+ * @file interrupt.h
+ * @brief Exception handlers
+ */
+
 /*
- * interrupt.h
- *
- * Copyright (C) 2023 Stefan Gloor
+ * Copyright (C) 2024 Stefan Gloor
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,20 +29,51 @@
  *
  */
 
+/**
+ * @brief Non-maskable interrupt handler
+ */
 void NMI_Handler(void);
 
-void HardFault_Handler(void);
+/**
+ * @brief Hard fault exception handler
+ * @note Compile with -DDEBUG for debug information
+ */
+__attribute__((noreturn)) void HardFault_Handler(void);
 
-void MemManage_Handler(void);
+/**
+ * @brief MemManage exception handler
+ * @note Compile with -DDEBUG for debug information
+ */
+__attribute__((noreturn)) void MemManage_Handler(void);
 
-void BusFault_Handler(void);
+/**
+ * @brief Bus fault exception handler handler
+ * @note Compile with -DDEBUG for debug information
+ */
+__attribute__((noreturn)) void BusFault_Handler(void);
 
-void UsageFault_Handler(void);
+/**
+ * @brief Usage fault exception handler
+ * @note Compile with -DDEBUG for debug information
+ */
+__attribute__((noreturn)) void UsageFault_Handler(void);
 
+/**
+ * @brief SVC exception handler
+ */
 void SVC_Handler(void);
 
+/**
+ * @brief Debug monitor interrupt handler
+ */
 void DebugMon_Handler(void);
 
+/**
+ * @brief Pendable service request handler
+ */
 void PendSV_Handler(void);
 
+/**
+ * @brief System tick handler
+ */
 void SysTick_Handler(void);

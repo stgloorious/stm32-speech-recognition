@@ -1,7 +1,10 @@
+/**
+ * @file clock.h
+ * @brief System clock configuration
+ */
+
 /*
- * clock.h
- *
- * Copyright (C) 2023 Stefan Gloor
+ * Copyright (C) 2024 Stefan Gloor
  *
  * SPDX-License-Identifier: MIT
  *
@@ -26,4 +29,8 @@
  *
  */
 
-void SystemClock_Config(void);
+/**
+ * @brief Initialize system clocks
+ * @return 0 on success
+ */
+int SystemClock_Config(void);

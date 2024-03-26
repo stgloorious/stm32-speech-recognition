@@ -30,7 +30,7 @@
  */
 
 #include "stm32l4xx_hal.h"
-#include "stm32l4xx_nucleo_32.h"
+#include "stm32l475e_iot01.h"
 
 #include "clock.h"
 #include "debug_io.h"
@@ -57,12 +57,12 @@ int main(void)
 	/* Configure and start the necessary clocks and PLLs */
 	SystemClock_Config();
 
-	BSP_LED_Init(LED3);
+	BSP_LED_Init(LED2);
 
 	uart_debug_init();
 
 	printf("\n\n");
-	printf("STM32 NUCLEO-K432KC Demo Application Version 1.0\n");
+	printf("ML on MCU Demo\n");
 	printf("Build date: %s %s\n", __DATE__, __TIME__);
 	printf("GCC %i.%i.%i ", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 	printf("Newlib %s\n\n", _NEWLIB_VERSION);
@@ -72,13 +72,13 @@ int main(void)
 	printf("Hello World!\n");
 
 	while (1) {
-		BSP_LED_Toggle(LED3);
+		BSP_LED_Toggle(LED2);
 		HAL_Delay(100);
-		BSP_LED_Toggle(LED3);
+		BSP_LED_Toggle(LED2);
 		HAL_Delay(100);
-		BSP_LED_Toggle(LED3);
+		BSP_LED_Toggle(LED2);
 		HAL_Delay(100);
-		BSP_LED_Toggle(LED3);
+		BSP_LED_Toggle(LED2);
 		HAL_Delay(500);
 	}
 }

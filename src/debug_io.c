@@ -88,10 +88,10 @@ int _read(int fd, uint8_t *buf, int cnt)
 
 int uart_debug_init()
 {
-	__HAL_RCC_USART2_CLK_ENABLE();
-	__HAL_RCC_GPIOA_CLK_ENABLE();
+	__HAL_RCC_USART1_CLK_ENABLE();
+	__HAL_RCC_GPIOB_CLK_ENABLE();
 
-	uart_hd_debug_uart.Instance = USART2;
+	uart_hd_debug_uart.Instance = USART1;
 
 	uart_hd_debug_uart.Init.BaudRate = 115200;
 	uart_hd_debug_uart.Init.WordLength = UART_WORDLENGTH_8B;
@@ -110,31 +110,31 @@ int uart_debug_init()
 
 	GPIO_InitTypeDef GPIO_InitStruct;
 	/* UART_TX */
-	GPIO_InitStruct.Pin = GPIO_PIN_2;
+	GPIO_InitStruct.Pin = GPIO_PIN_6;
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 	/* UART_RX */
-	GPIO_InitStruct.Pin = GPIO_PIN_15;
+	GPIO_InitStruct.Pin = GPIO_PIN_7;
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	GPIO_InitStruct.Alternate = GPIO_AF3_USART2;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+	GPIO_InitStruct.Alternate = GPIO_AF7_USART1;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 	__HAL_UART_ENABLE_IT(&uart_hd_debug_uart, UART_IT_RXNE);
-	HAL_NVIC_SetPriority(USART2_IRQn, 10, 10);
-	HAL_NVIC_EnableIRQ(USART2_IRQn);
+	HAL_NVIC_SetPriority(USART1_IRQn, 10, 10);
+	HAL_NVIC_EnableIRQ(USART1_IRQn);
 
 	HAL_UART_Receive_IT(&uart_hd_debug_uart,
 			    uart_rx_fifo + uart_rx_fifo_enqueue, 1);
 	return 0;
 }
 
-void USART2_IRQHandler()
+void USART1_IRQHandler()
 {
 	HAL_UART_IRQHandler(&uart_hd_debug_uart);
 }

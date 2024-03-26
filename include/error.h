@@ -35,10 +35,7 @@
 */
 #define ERR(msg) error_Handler(__FILE__, __LINE__, msg)
 #else
-#define ERR(file, line, msg) \
-	(void)file;          \
-	(void)line;          \
-	(void)msg;
+#define ERR(msg) (void)msg;
 #endif
 
 /**

@@ -7,8 +7,6 @@ This demo targets the STM32 NUCLEO-L432KC board (STM32L432KC), which contains an
  - Modular setup: HAL drivers are fetched from upstream repositories and are separate from application code.
  - CMake build system: transparent and easy to use with your favorite editor or CI/CD.
  - No need to install a GUI IDE or other unnecessary dependencies: use only what you want/need.
- - [newlib](https://sourceware.org/newlib/) as libc implementation, built with FPU support.
- - UART debug console as `stdout`/`stderr`: Support for `printf()`, assertions, exceptions etc.
 
 Example Output:
  ~~~
@@ -21,27 +19,12 @@ Hello World!
 
 ## Dependencies
 ### Toolchain
-I built a toolchain with [crosstool-NG](https://crosstool-ng.github.io/)
-which was tailored to the STM32 by using `-mcpu=cortex-m4`, `-mfloat-abi=hard` and `mfpu=fpv4-sp-d16`.
-The main reason for this is that I had problems linking against libc with
-hard-float support using the standard
-[arm-none-eabi](https://developer.arm.com/Tools%20and%20Software/GNU%20Toolchain),
-as it would always link against the standard (soft float) libc, resulting
-in errors like these:
+You'll need the standard GCC toolchain, `arm-none-eabi`.
+Download either directly [from Arm](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads)
+or install using your system package manager, e.g.,
 ~~~
-<executable> uses VFP register arguments, <libc> does not
+sudo apt-get install gcc-arm-none-eabi
 ~~~
-regardless of flags like `-nostdlib`.
-
-The STM32F432KC ARM Cortex-M4 does have hardware support for `float` (single-precision)
-arithmetic, so it makes sense to use the right toolchain/libc.
-
-To build the toolchain:
-
-1. [Download crosstool-NG](https://crosstool-ng.github.io/download/) and install it.
-2. Copy `toolchain.config` to `.config`
-3. Run `ct-ng oldconfig` to update, `ct-ng menuconfig` to review and `ct-ng build` to build the toolchain.
-4. After successful build, make sure the binaries are in your `$PATH`
 
 ### Debugging & Loader
 To upload the final binary to the board I use
@@ -52,7 +35,7 @@ board.
 
 However, sometimes it's also nice to have a more capable graphical debugger, for which I use
 [Ozone](https://www.segger.com/products/development-tools/ozone-j-link-debugger/)
-with a SEGGER J-Link Plus connected over SWD. I also tried enabling tracing via the SWO pin, 
+with a SEGGER J-Link Plus connected over SWD. I also tried enabling tracing via the SWO pin,
 but could not get it to work.
 Ozone can also directly flash the STM32L432KC, so no need for the ST-Link tools.
 

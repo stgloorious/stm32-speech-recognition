@@ -34,10 +34,18 @@
 
 #include "clock.h"
 #include "debug_io.h"
+#include "dfsdm.h"
+#include "dma.h"
 #include "error.h"
 
 #include <stdio.h>
 #include <string.h>
+
+UART_HandleTypeDef huart1;
+
+volatile int flag = 0;
+#define BUF_LEN 256
+int32_t buf[BUF_LEN];
 
 int main(void)
 {
@@ -57,28 +65,33 @@ int main(void)
 	/* Configure and start the necessary clocks and PLLs */
 	SystemClock_Config();
 
-	BSP_LED_Init(LED2);
-
+	/* Initialize peripherals */
 	uart_debug_init();
-
-	printf("\n\n");
-	printf("ML on MCU Demo\n");
-	printf("Build date: %s %s\n", __DATE__, __TIME__);
-	printf("GCC %i.%i.%i ", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-	printf("Newlib %s\n\n", _NEWLIB_VERSION);
-
-	HAL_Delay(1000);
+	dma_init();
+	dfsdm_init();
+	BSP_LED_Init(LED2);
+	BSP_LED_Off(LED2);
 
 	printf("Hello World!\n");
 
-	while (1) {
-		BSP_LED_Toggle(LED2);
-		HAL_Delay(100);
-		BSP_LED_Toggle(LED2);
-		HAL_Delay(100);
-		BSP_LED_Toggle(LED2);
-		HAL_Delay(100);
-		BSP_LED_Toggle(LED2);
-		HAL_Delay(500);
+	/* Start reading from microphone */
+	if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, buf, BUF_LEN) !=
+	    HAL_OK) {
+		ERR("Failed to start conversion.");
 	}
+	while (1) {
+		while (!flag)
+			;
+		flag = 0;
+		BSP_LED_On(LED2);
+		for (uint32_t i = 0; i < BUF_LEN; i++) {
+			printf("%li\n", buf[i]);
+		}
+	}
+}
+
+void HAL_DFSDM_FilterRegConvCpltCallback(
+	DFSDM_Filter_HandleTypeDef *hdfsdm_filter)
+{
+	flag = 1;
 }

@@ -29,6 +29,7 @@
  */
 
 #include "debug_io.h"
+#include "error.h"
 #include "stm32l4xx_hal.h"
 
 #include <unistd.h>
@@ -108,6 +109,12 @@ int uart_debug_init()
 		return -1;
 	}
 
+	RCC_PeriphCLKInitTypeDef PeriphClkInit;
+	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1;
+	PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
+	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
+		ERR("Failed to setup peripheral clock for UART.\n");
+	}
 	GPIO_InitTypeDef GPIO_InitStruct;
 	/* UART_TX */
 	GPIO_InitStruct.Pin = GPIO_PIN_6;

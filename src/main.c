@@ -39,13 +39,14 @@
 #include "error.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 UART_HandleTypeDef huart1;
 
 volatile int flag = 0;
-#define BUF_LEN 256
-int32_t buf[BUF_LEN];
+#define BUF_LEN 2048
+int32_t *buf;
 
 int main(void)
 {
@@ -72,6 +73,11 @@ int main(void)
 	BSP_LED_Init(LED2);
 	BSP_LED_Off(LED2);
 
+	buf = malloc(BUF_LEN * sizeof(int32_t));
+	if (buf == NULL) {
+		ERR("malloc() failed.\n");
+	}
+
 	printf("Hello World!\n");
 
 	/* Start reading from microphone */
@@ -83,10 +89,10 @@ int main(void)
 		while (!flag)
 			;
 		flag = 0;
-		BSP_LED_On(LED2);
-		for (uint32_t i = 0; i < BUF_LEN; i++) {
+		BSP_LED_Toggle(LED2);
+		/*for (uint32_t i = 0; i < BUF_LEN; i++) {
 			printf("%li\n", buf[i]);
-		}
+		}*/
 	}
 }
 

@@ -35,13 +35,22 @@ add_link_options(-mfloat-abi=hard)
 FILE(GLOB hal_srcs third_party/STM32CubeL4/Drivers/STM32L4xx_HAL_Driver/Src/*.c)
 add_library(hal STATIC ${hal_srcs})
 
+FILE(GLOB usbd_srcs
+	third_party/STM32CubeL4/Middlewares/ST/STM32_USB_Device_Library/Core/Src/*.c
+	third_party/STM32CubeL4/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src/*.c
+)
+include_directories(third_party/STM32CubeL4/Middlewares/ST/STM32_USB_Device_Library/Core/Inc)
+include_directories(third_party/STM32CubeL4/Middlewares/ST/STM32_USB_Device_Library/Class/HID/Inc)
+add_library(usbd STATIC ${usbd_srcs})
+
+
 FILE(GLOB demo_srcs src/*.c
     third_party/STM32CubeL4/Drivers/CMSIS/Device/ST/STM32L4xx/Source/Templates/gcc/startup_stm32l475xx.s
     third_party/STM32CubeL4/Drivers/BSP/B-L475E-IOT01/stm32l475e_iot01.c
 )
 
 add_executable(demo.elf ${demo_srcs})
-target_link_libraries(demo.elf hal)
+target_link_libraries(demo.elf hal usbd)
 
 add_custom_target(bin ALL DEPENDS demo.elf
     COMMAND ${OBJCOPY} -O binary demo.elf demo.bin

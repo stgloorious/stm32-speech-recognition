@@ -38,6 +38,10 @@
 #include "dma.h"
 #include "error.h"
 
+#include "usbd_core.h"
+#include "usbd_desc.h"
+#include "usbd_hid.h" 
+
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,6 +51,10 @@
 volatile int flag = 0;
 #define BUF_LEN 4000 // 100 ms @ 16 kS/s
 int32_t *buf;
+
+USBD_HandleTypeDef USBD_Device;
+extern PCD_HandleTypeDef hpcd;
+__IO uint32_t joyready = 0;
 
 int main(void)
 {
@@ -72,6 +80,30 @@ int main(void)
 	dfsdm_init();
 	BSP_LED_Init(LED2);
 	BSP_LED_Off(LED2);
+
+	/* Enable Power Clock*/
+	__HAL_RCC_PWR_CLK_ENABLE();
+
+	/* Enable USB power on Pwrctrl CR2 register */
+	HAL_PWREx_EnableVddUSB();
+
+	/* Configure Tamper button for remote wakeup */
+	BSP_PB_Init(BUTTON_USER, BUTTON_MODE_EXTI);
+
+	/* Init Device Library */
+	if (USBD_Init(&USBD_Device, &HID_Desc, 0) != USBD_OK){
+		ERR("Failed to initialize usbd driver.\n");
+	}
+
+	/* Add Supported Class */
+	if (USBD_RegisterClass(&USBD_Device, USBD_HID_CLASS) != USBD_OK){
+		ERR("Failed to register HID class with usbd driver.\n");
+	}
+
+	/* Start Device Process */
+	if (USBD_Start(&USBD_Device) != USBD_OK){
+		ERR("Failed to start usbd.\n");
+	}
 
 	buf = malloc(BUF_LEN * sizeof(int32_t));
 	if (buf == NULL) {

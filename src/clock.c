@@ -84,6 +84,11 @@ void SystemClock_Config(void)
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
+	/* Select MSI output as USB clock source */
+	PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USB;
+	PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_MSI;
+	HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
+
 	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) !=
 	    HAL_OK) {
 		ERR("Failed to initialize clocks.\n");

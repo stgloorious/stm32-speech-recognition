@@ -27,12 +27,13 @@
  *
  *
  */
+#include <stdint.h>
+#include <unistd.h>
 
 #include "debug_io.h"
 #include "error.h"
 #include "stm32l4xx_hal.h"
 
-#include <unistd.h>
 
 UART_HandleTypeDef uart_hd_debug_uart;
 
@@ -87,6 +88,10 @@ int _read(int fd, uint8_t *buf, int cnt)
 	return i;
 }
 
+int uart_write_bulk(char* buf, size_t len){
+    return (HAL_UART_Transmit(&uart_hd_debug_uart, (uint8_t*)buf, len, 500) != HAL_OK);
+}
+
 int uart_debug_init()
 {
 	__HAL_RCC_USART1_CLK_ENABLE();
@@ -94,7 +99,7 @@ int uart_debug_init()
 
 	uart_hd_debug_uart.Instance = USART1;
 
-	uart_hd_debug_uart.Init.BaudRate = 115200;
+	uart_hd_debug_uart.Init.BaudRate = 350000;
 	uart_hd_debug_uart.Init.WordLength = UART_WORDLENGTH_8B;
 	uart_hd_debug_uart.Init.StopBits = UART_STOPBITS_1;
 	uart_hd_debug_uart.Init.Parity = UART_PARITY_NONE;

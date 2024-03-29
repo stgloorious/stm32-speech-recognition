@@ -33,3 +33,11 @@
  * @return 0 on success
  */
 int uart_debug_init();
+
+/**
+ * @brief Transfer bulk data more efficiently than with printf
+ * @param[in] buf data to be transmitted
+ * @param[in] len size of data
+ * @returns 0 on success
+ */
+int uart_write_bulk(char* buf, size_t len);

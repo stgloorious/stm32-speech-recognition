@@ -38,14 +38,14 @@
 #include "dma.h"
 #include "error.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-UART_HandleTypeDef huart1;
 
 volatile int flag = 0;
-#define BUF_LEN 2048
+#define BUF_LEN 4000 // 100 ms @ 16 kS/s
 int32_t *buf;
 
 int main(void)
@@ -78,21 +78,28 @@ int main(void)
 		ERR("malloc() failed.\n");
 	}
 
-	printf("Hello World!\n");
+	printf("Hello World!\n\n\n");
 
 	/* Start reading from microphone */
 	if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, buf, BUF_LEN) !=
 	    HAL_OK) {
 		ERR("Failed to start conversion.");
 	}
+	long count;
+	long oldcount;
 	while (1) {
 		while (!flag)
 			;
 		flag = 0;
 		BSP_LED_Toggle(LED2);
-		/*for (uint32_t i = 0; i < BUF_LEN; i++) {
-			printf("%li\n", buf[i]);
-		}*/
+		//uart_write_bulk((char*)buf, BUF_LEN);
+		count = HAL_GetTick();
+		if (count - oldcount != (BUF_LEN * 100) / 1600){
+			printf("\n\n\n\n\n\n");
+			printf("Data streaming too slow: %lu/%u\n", count - oldcount, (BUF_LEN * 100)/1600);
+			while(1);
+		}
+		oldcount = count;
 	}
 }
 

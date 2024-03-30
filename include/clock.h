@@ -30,6 +30,22 @@
  */
 
 /**
- * @brief Initialize system clocks
- */
+  * @brief  System Clock Configuration
+  * The system Clock is configured as follow :
+  *
+  * System Clock source            = PLL (MSI)
+  * SYSCLK(Hz)                     = 80000000
+  * HCLK(Hz)                       = 80000000
+  * AHB Prescaler                  = 1
+  * APB1 Prescaler                 = 1
+  * APB2 Prescaler                 = 2
+  * MSI Frequency(Hz)              = 4800000
+  * LSE Frequency(Hz)              = 32768
+  * PLL_M                          = 6
+  * PLL_N                          = 40
+  * PLL_P                          = 7
+  * PLL_Q                          = 4
+  * PLL_R                          = 4
+  * Flash Latency(WS)              = 4
+  */
 void SystemClock_Config(void);

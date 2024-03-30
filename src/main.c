@@ -40,16 +40,15 @@
 
 #include "usbd_core.h"
 #include "usbd_desc.h"
-#include "usbd_hid.h" 
+#include "usbd_hid.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-
 volatile int flag = 0;
-#define BUF_LEN 4000 // 100 ms @ 16 kS/s
+#define BUF_LEN 1600 // 100 ms @ 16 kS/s
 int32_t *buf;
 
 USBD_HandleTypeDef USBD_Device;
@@ -91,17 +90,17 @@ int main(void)
 	BSP_PB_Init(BUTTON_USER, BUTTON_MODE_EXTI);
 
 	/* Init Device Library */
-	if (USBD_Init(&USBD_Device, &HID_Desc, 0) != USBD_OK){
+	if (USBD_Init(&USBD_Device, &HID_Desc, 0) != USBD_OK) {
 		ERR("Failed to initialize usbd driver.\n");
 	}
 
 	/* Add Supported Class */
-	if (USBD_RegisterClass(&USBD_Device, USBD_HID_CLASS) != USBD_OK){
+	if (USBD_RegisterClass(&USBD_Device, USBD_HID_CLASS) != USBD_OK) {
 		ERR("Failed to register HID class with usbd driver.\n");
 	}
 
 	/* Start Device Process */
-	if (USBD_Start(&USBD_Device) != USBD_OK){
+	if (USBD_Start(&USBD_Device) != USBD_OK) {
 		ERR("Failed to start usbd.\n");
 	}
 
@@ -125,11 +124,14 @@ int main(void)
 		flag = 0;
 		BSP_LED_Toggle(LED2);
 		//uart_write_bulk((char*)buf, BUF_LEN);
+		printf("%lu\n", count - oldcount);
 		count = HAL_GetTick();
-		if (count - oldcount != (BUF_LEN * 100) / 1600){
+		if (count - oldcount != 100) {
 			printf("\n\n\n\n\n\n");
-			printf("Data streaming too slow: %lu/%u\n", count - oldcount, (BUF_LEN * 100)/1600);
-			while(1);
+			printf("Data streaming too slow: %lu/%u\n",
+			       count - oldcount, 100);
+			while (1)
+				;
 		}
 		oldcount = count;
 	}

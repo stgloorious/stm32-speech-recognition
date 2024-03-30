@@ -40,4 +40,4 @@ int uart_debug_init();
  * @param[in] len size of data
  * @returns 0 on success
  */
-int uart_write_bulk(char* buf, size_t len);
+int uart_write_bulk(char *buf, size_t len);

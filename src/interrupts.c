@@ -35,13 +35,12 @@
 #include "usbd_def.h"
 #include "usbd_hid.h"
 
-#define CURSOR_STEP     5
+#define CURSOR_STEP 5
 uint8_t HID_Buffer[4];
 extern PCD_HandleTypeDef hpcd;
 extern USBD_HandleTypeDef USBD_Device;
 
 static void GetPointerData(uint8_t *pbuf);
-
 
 void NMI_Handler(void)
 {
@@ -110,21 +109,19 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-  static __IO uint32_t counter=0;
-  HAL_IncTick();
+	static __IO uint32_t counter = 0;
+	HAL_IncTick();
 
-    /* check Joystick state every polling interval (10ms) */
-    if (counter++ == USBD_HID_GetPollingInterval(&USBD_Device))
-    {
-      GetPointerData(HID_Buffer);
-      
-      /* send data though IN endpoint*/
-      if((HID_Buffer[1] != 0) || (HID_Buffer[2] != 0))
-      {
-        USBD_HID_SendReport(&USBD_Device, HID_Buffer, 4);
-      }
-      counter =0;
-    }
+	/* check Joystick state every polling interval (10ms) */
+	if (counter++ == USBD_HID_GetPollingInterval(&USBD_Device)) {
+		GetPointerData(HID_Buffer);
+
+		/* send data though IN endpoint*/
+		if ((HID_Buffer[1] != 0) || (HID_Buffer[2] != 0)) {
+			USBD_HID_SendReport(&USBD_Device, HID_Buffer, 4);
+		}
+		counter = 0;
+	}
 }
 
 /******************************************************************************/
@@ -141,7 +138,7 @@ void SysTick_Handler(void)
   */
 void OTG_FS_IRQHandler(void)
 {
-  HAL_PCD_IRQHandler(&hpcd);
+	HAL_PCD_IRQHandler(&hpcd);
 }
 
 /**
@@ -151,7 +148,7 @@ void OTG_FS_IRQHandler(void)
   */
 void EXTI15_10_IRQHandler(void)
 {
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
+	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_13);
 }
 
 /**
@@ -161,22 +158,19 @@ void EXTI15_10_IRQHandler(void)
   */
 static void GetPointerData(uint8_t *pbuf)
 {
-  static int8_t cnt = 0;
-  int8_t  x = 0, y = 0 ;
-  
-  if(cnt++ > 0)
-  {
-    x = CURSOR_STEP;
-  }
-  else
-  {
-    x = -CURSOR_STEP;
-  }
-  
-  pbuf[0] = 0;
-  pbuf[1] = x;
-  pbuf[2] = y;
-  pbuf[3] = 0;
+	static int8_t cnt = 0;
+	int8_t x = 0, y = 0;
+
+	if (cnt++ > 0) {
+		x = CURSOR_STEP;
+	} else {
+		x = -CURSOR_STEP;
+	}
+
+	pbuf[0] = 0;
+	pbuf[1] = x;
+	pbuf[2] = y;
+	pbuf[3] = 0;
 }
 
 /**
@@ -187,7 +181,6 @@ static void GetPointerData(uint8_t *pbuf)
 /*void PPP_IRQHandler(void)
 {
 }*/
-
 
 /**
   * @}

@@ -100,7 +100,7 @@ int uart_debug_init()
 
 	uart_hd_debug_uart.Instance = USART1;
 
-	uart_hd_debug_uart.Init.BaudRate = 9600;
+	uart_hd_debug_uart.Init.BaudRate = 115200;
 	uart_hd_debug_uart.Init.WordLength = UART_WORDLENGTH_8B;
 	uart_hd_debug_uart.Init.StopBits = UART_STOPBITS_1;
 	uart_hd_debug_uart.Init.Parity = UART_PARITY_NONE;

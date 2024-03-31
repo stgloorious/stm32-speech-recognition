@@ -118,7 +118,7 @@ void SysTick_Handler(void)
 
 		/* send data though IN endpoint*/
 		if ((HID_Buffer[1] != 0) || (HID_Buffer[2] != 0)) {
-			USBD_HID_SendReport(&USBD_Device, HID_Buffer, 4);
+			//USBD_HID_SendReport(&USBD_Device, HID_Buffer, 4);
 		}
 		counter = 0;
 	}

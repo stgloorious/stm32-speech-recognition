@@ -112,28 +112,29 @@ int main(void)
 	printf("Hello World!\n\n\n");
 
 	/* Start reading from microphone */
-	if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, buf, BUF_LEN) !=
+	/*if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, buf, BUF_LEN) !=
 	    HAL_OK) {
 		ERR("Failed to start conversion.");
-	}
-	long count;
-	long oldcount;
+	}*/
+	long count = 0;
+	//long oldcount;
 	while (1) {
-		while (!flag)
-			;
+		//while (!flag)
+		//	;
 		flag = 0;
 		BSP_LED_Toggle(LED2);
+		HAL_Delay(200);
 		//uart_write_bulk((char*)buf, BUF_LEN);
-		printf("%lu\n", count - oldcount);
-		count = HAL_GetTick();
+		printf("%lu\n", count++);
+		/*count = HAL_GetTick();
 		if (count - oldcount != 100) {
 			printf("\n\n\n\n\n\n");
 			printf("Data streaming too slow: %lu/%u\n",
 			       count - oldcount, 100);
-			while (1)
-				;
+			//while (1)
+			//	;
 		}
-		oldcount = count;
+		oldcount = count;*/
 	}
 }
 

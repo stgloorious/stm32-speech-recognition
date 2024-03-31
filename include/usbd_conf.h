@@ -33,12 +33,12 @@
 #define USBD_MAX_NUM_CONFIGURATION 1
 #define USBD_MAX_STR_DESC_SIZ 0x100
 #define USBD_SELF_POWERED 1
-#define USBD_DEBUG_LEVEL 0
+#define USBD_DEBUG_LEVEL 3
 
 /* Exported macro ------------------------------------------------------------*/
 /* Memory management macros */
-#define USBD_malloc (void *)USBD_static_malloc
-#define USBD_free USBD_static_free
+#define USBD_malloc malloc
+#define USBD_free free
 #define USBD_memset memset
 #define USBD_memcpy memcpy
 #define USBD_Delay HAL_Delay

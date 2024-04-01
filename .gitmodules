@@ -1,3 +1,6 @@
 [submodule "third_party/STM32CubeL4"]
 	path = third_party/STM32CubeL4
 	url = https://github.com/STMicroelectronics/STM32CubeL4.git
+[submodule "third_party/tflite-micro"]
+	path = third_party/tflite-micro
+	url = https://github.com/tensorflow/tflite-micro.git

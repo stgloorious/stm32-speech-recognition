@@ -4,11 +4,9 @@ name: Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches: "**"
   pull_request:
-    branches: [ "main" ]
-  schedule:
-    - cron: '0 10 * * 3'
+    branches: "**"
 
 jobs:
   build:

@@ -44,4 +44,4 @@
  * @param[in] line line number, use __LINE__
  * @param[in] msg error message or NULL
  */
-void error_Handler(char *file, int line, char *msg);
+void error_Handler(const char *file, int line, const char *msg);

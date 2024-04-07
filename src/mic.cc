@@ -1,6 +1,6 @@
 /**
- * @file main.c
- * @brief Demo application
+ * @file mic.cc
+ * @brief Microphone data acquisition
  */
 
 /*
@@ -29,56 +29,52 @@
  *
  */
 
+#include <cstddef>
+#include <cstdint>
+#include <cassert>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
+#include "mic.h"
+
+extern "C" {
 #include "stm32l4xx_hal.h"
-#include "stm32l475e_iot01.h"
-
-#include "clock.h"
-#include "debug_io.h"
+#include "dma.h"
+#include "dfsdm.h"
 #include "error.h"
+}
 
-#include <stdio.h>
-#include <string.h>
-
-int main(void)
+void speech::mic::init()
 {
-	/* Disable buffering */
-	setvbuf(stdin, NULL, _IONBF, 0);
-	setvbuf(stdout, NULL, _IONBF, 0);
-	setvbuf(stderr, NULL, _IONBF, 0);
-
-	/* Initialize the hardware abstraction library */
-	if (HAL_Init() != HAL_OK) {
-		/* As configuration is not completed yet,
-		* this message might not make it out.
-		* Try anyway. */
-		ERR("HAL_Init() failed.\n");
+	dma_init();
+	dfsdm_init();
+	this->buf = (int32_t *)malloc(this->buf_size * sizeof(int32_t));
+	if (this->buf == NULL) {
+		ERR("malloc failed.\n");
 	}
 
-	/* Configure and start the necessary clocks and PLLs */
-	SystemClock_Config();
+	/* Memory test */
+	memset(this->buf, 42, this->buf_size * sizeof(int32_t));
+	for (size_t i = 0; i < this->buf_size; i++) {
+		this->buf[i] = 42;
+	}
 
-	BSP_LED_Init(LED2);
+	for (size_t i = 0; i < this->buf_size; i++) {
+		if (this->buf[i] != 42) {
+			printf("mismatch on %u\n", i);
+		}
+		assert(this->buf[i] == 42);
+	}
 
-	uart_debug_init();
+	if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, this->buf,
+					     this->buf_size) != HAL_OK) {
+		ERR("Failed to start conversion.\n");
+	}
+}
 
-	printf("\n\n");
-	printf("ML on MCU Demo\n");
-	printf("Build date: %s %s\n", __DATE__, __TIME__);
-	printf("GCC %i.%i.%i ", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-	printf("Newlib %s\n\n", _NEWLIB_VERSION);
-
-	HAL_Delay(1000);
-
-	printf("Hello World!\n");
-
-	while (1) {
-		BSP_LED_Toggle(LED2);
-		HAL_Delay(100);
-		BSP_LED_Toggle(LED2);
-		HAL_Delay(100);
-		BSP_LED_Toggle(LED2);
-		HAL_Delay(100);
-		BSP_LED_Toggle(LED2);
-		HAL_Delay(500);
+void speech::mic::dump_recording()
+{
+	for (size_t i = 0; i < this->buf_size; i++) {
+		printf("%li\n", this->buf[i]);
 	}
 }

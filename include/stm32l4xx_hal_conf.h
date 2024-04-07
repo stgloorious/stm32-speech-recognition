@@ -49,7 +49,8 @@ extern "C" {
 /* #define HAL_IWDG_MODULE_ENABLED */
 /* #define HAL_LPTIM_MODULE_ENABLED */
 /* #define HAL_OPAMP_MODULE_ENABLED */
-/* #define HAL_PCD_MODULE_ENABLED */
+#define HAL_PCD_MODULE_ENABLED
+#define HAL_DFSDM_MODULE_ENABLED
 #define HAL_PWR_MODULE_ENABLED
 /* #define HAL_QSPI_MODULE_ENABLED */
 #define HAL_RCC_MODULE_ENABLED
@@ -163,7 +164,7 @@ extern "C" {
  * @brief This is the HAL system configuration section
  */
 #define VDD_VALUE 3300U /*!< Value of VDD in mv */
-#define TICK_INT_PRIORITY 0x0FU /*!< tick interrupt priority */
+#define TICK_INT_PRIORITY 0x00U /*!< tick interrupt priority */
 #define USE_RTOS 0U
 #define PREFETCH_ENABLE 1U
 #define INSTRUCTION_CACHE_ENABLE 1U
@@ -232,6 +233,10 @@ extern "C" {
 
 #ifdef HAL_DAC_MODULE_ENABLED
 #include "stm32l4xx_hal_dac.h"
+#endif /* HAL_DAC_MODULE_ENABLED */
+
+#ifdef HAL_DFSDM_MODULE_ENABLED
+#include "stm32l4xx_hal_dfsdm.h"
 #endif /* HAL_DAC_MODULE_ENABLED */
 
 #ifdef HAL_FIREWALL_MODULE_ENABLED

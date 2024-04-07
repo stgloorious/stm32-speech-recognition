@@ -1,6 +1,6 @@
-/*
- * @file error.c
- * @brief Application-level error handling
+/**
+ * @file dma.h
+ * @brief DMA for DFSDM
  */
 
 /*
@@ -29,12 +29,9 @@
  *
  */
 
-#include "error.h"
-#include <stdio.h>
+extern DMA_HandleTypeDef hdma_dfsdm1_flt0;
 
-void error_Handler(const char *file, int line, const char *msg)
-{
-	printf("ERROR: %s:%u: %s", file, line, msg);
-	while (1)
-		;
-}
+/**
+ * @brief Initialize DMA for use with DFSDM
+ */
+void dma_init(void);

@@ -22,7 +22,7 @@ jobs:
 
     - name: Build
       run: |
-           sudo apt-get install gcc-arm-none-eabi
+           sudo apt-get install build-essential cmake gcc-arm-none-eabi python3-numpy python3-pil unzip
            cmake -B build
            make -C ${{github.workspace}}/build
 

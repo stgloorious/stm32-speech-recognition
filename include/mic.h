@@ -1,6 +1,6 @@
-/*
- * @file error.c
- * @brief Application-level error handling
+/**
+ * @file mic.h
+ * @brief Microphone data acquisition
  */
 
 /*
@@ -29,12 +29,14 @@
  *
  */
 
-#include "error.h"
-#include <stdio.h>
-
-void error_Handler(const char *file, int line, const char *msg)
+namespace speech
 {
-	printf("ERROR: %s:%u: %s", file, line, msg);
-	while (1)
-		;
-}
+class mic {
+	int32_t *buf;
+	size_t buf_size = 8000;
+
+    public:
+	void init();
+	void dump_recording();
+};
+};

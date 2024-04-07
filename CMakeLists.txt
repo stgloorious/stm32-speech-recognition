@@ -82,31 +82,19 @@ FILE(GLOB tflm_srcs
 	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/third_party/kissfft/*.c
 	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/third_party/kissfft/tools/*.c
 )
+# Remove testing functionality from tflm library
+list(FILTER tflm_srcs EXCLUDE REGEX ".*_test\.c+")
 
-# Create downloads directory for tflm dependencies
-add_custom_command(OUTPUT
-    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads
-    COMMAND
-    mkdir ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads
-)
 # Download dependencies for tflm
 add_custom_command(OUTPUT
-    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers
-    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/kissfft
-    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/ruy
-    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/gemmlowp
+    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads
     COMMAND
     make -f ./tensorflow/lite/micro/tools/make/Makefile third_party_downloads
-    DEPENDS
-    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/third_party/tflite-micro
 )
 add_library(tflm
     STATIC ${tflm_srcs}
-    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers
-    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/kissfft
-    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/ruy
-    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/gemmlowp
+    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads
 )
 
 # Project sources

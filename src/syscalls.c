@@ -174,3 +174,10 @@ int _execve(char *name, char **argv, char **env)
   errno = ENOMEM;
   return -1;
 }
+
+int getentropy(void* buf, size_t length){
+	(void)buf;
+	(void)length;
+	/* TODO: Use RNG */
+	return 0;
+}

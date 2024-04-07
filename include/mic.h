@@ -29,13 +29,14 @@
  *
  */
 
-namespace speech {
-	class mic {
-		int32_t* buf;
-		size_t buf_size = 8000;
+namespace speech
+{
+class mic {
+	int32_t *buf;
+	size_t buf_size = 8000;
 
-		public:
-			void init();
-			void dump_recording();
-	};
+    public:
+	void init();
+	void dump_recording();
+};
 };

@@ -226,7 +226,6 @@ void HAL_DFSDM_ChannelMspDeInit(DFSDM_Channel_HandleTypeDef *hdfsdm_channel)
 	}
 }
 
-
 void HAL_DFSDM_FilterRegConvCpltCallback(
 	DFSDM_Filter_HandleTypeDef *hdfsdm_filter)
 {

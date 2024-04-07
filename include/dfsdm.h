@@ -38,4 +38,3 @@ extern int dfsdm_conversion_done;
  * \brief Initialize the DFSDM for use with the PDM microphone
  */
 void dfsdm_init();
-

@@ -168,10 +168,11 @@ int main(int argc, char *argv[])
 	speech::mic microphone;
 	microphone.init();
 
-	while(!dfsdm_conversion_done);
+	while (!dfsdm_conversion_done)
+		;
 	microphone.dump_recording();
 
-    /* TODO this crashes, may be a problem with memset */
+	/* TODO this crashes, may be a problem with memset */
 	//TF_LITE_ENSURE_STATUS(ProfileMemoryAndLatency());
 	TF_LITE_ENSURE_STATUS(LoadFloatModelAndPerformInference());
 	TF_LITE_ENSURE_STATUS(LoadQuantModelAndPerformInference());

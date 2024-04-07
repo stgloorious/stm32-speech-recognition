@@ -9,6 +9,8 @@ set(CMAKE_C_COMPILER arm-none-eabi-gcc)
 set(CMAKE_CXX_COMPILER arm-none-eabi-c++)
 set(CMAKE_ASM_COMPILER arm-none-eabi-gcc)
 set(OBJCOPY arm-none-eabi-objcopy)
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 set(CMAKE_SYSTEM_PROCESSOR cortex-m4)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)

@@ -1,6 +1,6 @@
-/*
- * @file error.c
- * @brief Application-level error handling
+/**
+ * @file dfsdm.h
+ * @brief Interface and filter for PDM microphone
  */
 
 /*
@@ -29,12 +29,13 @@
  *
  */
 
-#include "error.h"
-#include <stdio.h>
+extern DFSDM_Filter_HandleTypeDef hdfsdm1_filter0;
+extern DFSDM_Channel_HandleTypeDef hdfsdm1_channel2;
 
-void error_Handler(const char *file, int line, const char *msg)
-{
-	printf("ERROR: %s:%u: %s", file, line, msg);
-	while (1)
-		;
-}
+extern int dfsdm_conversion_done;
+
+/**
+ * \brief Initialize the DFSDM for use with the PDM microphone
+ */
+void dfsdm_init();
+

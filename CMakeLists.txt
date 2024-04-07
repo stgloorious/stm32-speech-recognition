@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
-project(stm32-speech-recognition C ASM)
+project(stm32-speech-recognition C ASM CXX)
 
+# Bare-metal project
 set(CMAKE_SYSTEM_NAME Generic)
+
+# Compiler settings
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
+set(CMAKE_CXX_COMPILER arm-none-eabi-c++)
 set(CMAKE_ASM_COMPILER arm-none-eabi-gcc)
 set(OBJCOPY arm-none-eabi-objcopy)
 
@@ -12,39 +16,117 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
+# Cortex M4 with FPU
 add_compile_options(-mcpu=${CMAKE_SYSTEM_PROCESSOR})
-add_compile_options(-mthumb)
 add_compile_options(-mfpu=fpv4-sp-d16 -mfloat-abi=hard)
-add_compile_options(--specs=nano.specs --specs=nosys.specs)
-add_compile_options(-DSTM32L475xx -DDEBUG)
-add_compile_options(-fno-PIC)
-add_compile_options(-Wall -Wunused-result -Werror -O0 -ggdb)
-include_directories(include)
-include_directories(third_party/STM32CubeL4/Drivers/CMSIS/Device/ST/STM32L4xx/Include)
-include_directories(third_party/STM32CubeL4/Drivers/CMSIS/Core/Include)
-include_directories(third_party/STM32CubeL4/Drivers/STM32L4xx_HAL_Driver/Inc)
-include_directories(third_party/STM32CubeL4/Drivers/BSP/B-L475E-IOT01)
+add_compile_options(-mthumb)
 
+# Reduced Libc
+add_compile_options(--specs=nano.specs --specs=nosys.specs)
+
+# No position-independence/GOT
+add_compile_options(-fno-PIC)
+
+# TODO: check whether this reduces code size
+add_compile_options(-ffunction-sections -fdata-sections)
+
+# Warnings/Errors
+add_compile_options(-Wall -Wunused-result -Werror)
+
+# Optimizations
+add_compile_options(-O2 -ggdb)
+
+# Defines
+add_compile_options(-DSTM32L475xx -DDEBUG)
+
+# Hardware/HAL includes
+include_directories(include)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/STM32CubeL4/Drivers/CMSIS/Device/ST/STM32L4xx/Include)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/STM32CubeL4/Drivers/CMSIS/Core/Include)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/STM32CubeL4/Drivers/STM32L4xx_HAL_Driver/Inc)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/STM32CubeL4/Drivers/BSP/B-L475E-IOT01)
+
+# TFlite includes
+include_directories(include/models)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/tflite-micro)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/kissfft)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers/include)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/ruy)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/gemmlowp)
+
+# Link
 FILE(GLOB linker_script ld/*.ld)
 add_link_options(-T ${linker_script})
 add_link_options(-mcpu=${CMAKE_SYSTEM_PROCESSOR})
 add_link_options(-mfloat-abi=hard)
 
+# HAL Library
 FILE(GLOB hal_srcs third_party/STM32CubeL4/Drivers/STM32L4xx_HAL_Driver/Src/*.c)
 add_library(hal STATIC ${hal_srcs})
 
+# TFLite Library
+FILE(GLOB tflm_srcs
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/core/c/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/core/api/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tflite_bridge/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/arena_allocator/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/memory_planner/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/kernels/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/kernels/internal/reference/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/kernels/internal/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/kernels/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/schema/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/third_party/kissfft/*.c
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/third_party/kissfft/tools/*.c
+)
+
+# Create downloads directory for tflm dependencies
+add_custom_command(OUTPUT
+    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads
+    COMMAND
+    mkdir ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads
+)
+# Download dependencies for tflm
+add_custom_command(OUTPUT
+    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers
+    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/kissfft
+    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/ruy
+    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/gemmlowp
+    COMMAND
+    make -f ./tensorflow/lite/micro/tools/make/Makefile third_party_downloads
+    DEPENDS
+    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/third_party/tflite-micro
+)
+add_library(tflm
+    STATIC ${tflm_srcs}
+    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/flatbuffers
+    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/kissfft
+    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/ruy
+    ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/gemmlowp
+)
+
+# Project sources
 FILE(GLOB demo_srcs src/*.c
-    third_party/STM32CubeL4/Drivers/CMSIS/Device/ST/STM32L4xx/Source/Templates/gcc/startup_stm32l475xx.s
-    third_party/STM32CubeL4/Drivers/BSP/B-L475E-IOT01/stm32l475e_iot01.c
+	src/*.cc
+	src/models/*.cc
+	third_party/STM32CubeL4/Drivers/CMSIS/Device/ST/STM32L4xx/Source/Templates/gcc/startup_stm32l475xx.s
+	third_party/STM32CubeL4/Drivers/BSP/B-L475E-IOT01/stm32l475e_iot01.c
 )
 
 add_executable(demo.elf ${demo_srcs})
-target_link_libraries(demo.elf hal)
+target_link_libraries(demo.elf hal tflm)
 
+# st-util wants a binary-only format, not an ELF
 add_custom_target(bin ALL DEPENDS demo.elf
-    COMMAND ${OBJCOPY} -O binary demo.elf demo.bin
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+	COMMAND ${OBJCOPY} -O binary demo.elf demo.bin
+	WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
+# Upload using st-util
 add_custom_target(flash DEPENDS bin
-    COMMAND st-flash --reset write demo.bin 0x8000000
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+	COMMAND st-flash --reset write demo.bin 0x8000000
+	WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+

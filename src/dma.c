@@ -1,6 +1,6 @@
-/*
- * @file error.c
- * @brief Application-level error handling
+/**
+ * @file dma.c
+ * @brief DMA for DFSDM
  */
 
 /*
@@ -29,12 +29,22 @@
  *
  */
 
-#include "error.h"
-#include <stdio.h>
+#include "stm32l4xx_hal.h"
+#include "dma.h"
 
-void error_Handler(const char *file, int line, const char *msg)
+DMA_HandleTypeDef hdma_dfsdm1_flt0;
+
+void DMA1_Channel4_IRQHandler(void)
 {
-	printf("ERROR: %s:%u: %s", file, line, msg);
-	while (1)
-		;
+	HAL_DMA_IRQHandler(&hdma_dfsdm1_flt0);
+}
+
+/**
+  * Set up DMA for DFSDM
+  */
+void dma_init(void)
+{
+	__HAL_RCC_DMA1_CLK_ENABLE();
+	HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
 }

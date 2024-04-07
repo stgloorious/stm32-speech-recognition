@@ -1,6 +1,6 @@
-/*
- * @file error.c
- * @brief Application-level error handling
+/**
+ * @file mic.cc
+ * @brief Microphone data acquisition
  */
 
 /*
@@ -29,12 +29,51 @@
  *
  */
 
-#include "error.h"
-#include <stdio.h>
+#include <cstddef>
+#include <cstdint>
+#include <cassert>
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
+#include "mic.h"
 
-void error_Handler(const char *file, int line, const char *msg)
-{
-	printf("ERROR: %s:%u: %s", file, line, msg);
-	while (1)
-		;
+extern "C" {
+	#include "stm32l4xx_hal.h"
+	#include "dma.h"
+	#include "dfsdm.h"
+	#include "error.h"
 }
+
+void speech::mic::init() {
+	dma_init();
+	dfsdm_init();
+	this->buf = (int32_t*)malloc(this->buf_size * sizeof(int32_t));
+	if (this->buf == NULL){
+		ERR("malloc failed.\n");
+	}
+
+	/* Memory test */
+	memset(this->buf, 42, this->buf_size * sizeof(int32_t));
+	for (size_t i = 0; i < this->buf_size; i++){
+		this->buf[i] = 42;
+	}
+
+	for (size_t i = 0; i < this->buf_size; i++){
+		if (this->buf[i] != 42){
+			printf("mismatch on %u\n", i);
+		}
+		assert(this->buf[i] == 42);
+	}
+
+	if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, this->buf, this->buf_size) !=
+		HAL_OK) {
+		ERR("Failed to start conversion.\n");
+	}
+}
+
+void speech::mic::dump_recording(){
+	for (size_t i = 0; i < this->buf_size; i++){
+		printf("%li\n", this->buf[i]);
+	}
+}
+

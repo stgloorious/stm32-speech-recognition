@@ -53,19 +53,6 @@ void speech::mic::init()
 		ERR("malloc failed.\n");
 	}
 
-	/* Memory test */
-	memset(this->buf, 42, this->buf_size * sizeof(int32_t));
-	for (size_t i = 0; i < this->buf_size; i++) {
-		this->buf[i] = 42;
-	}
-
-	for (size_t i = 0; i < this->buf_size; i++) {
-		if (this->buf[i] != 42) {
-			printf("mismatch on %u\n", i);
-		}
-		assert(this->buf[i] == 42);
-	}
-
 	if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, this->buf,
 					     this->buf_size) != HAL_OK) {
 		ERR("Failed to start conversion.\n");

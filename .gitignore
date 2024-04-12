@@ -4,3 +4,7 @@ debug/ozone.*
 *.swp
 *.xlsx*
 *.md.pdf
+__pycache__
+venv
+tools/*.wav
+tools/*.log

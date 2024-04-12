@@ -2,3 +2,5 @@ tags
 build/
 debug/ozone.*
 *.swp
+*.xlsx*
+*.md.pdf

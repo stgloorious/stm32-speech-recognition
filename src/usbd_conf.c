@@ -165,8 +165,6 @@ void HAL_PCD_SuspendCallback(PCD_HandleTypeDef *hpcd)
 	__HAL_PCD_GATE_PHYCLOCK(hpcd);
 	USBD_LL_Suspend(hpcd->pData);
 
-	HAL_Delay(100);
-
 	/*Enter in STOP mode */
 	if (hpcd->Init.low_power_enable) {
 		/* Set SLEEPDEEP bit and SleepOnExit of Cortex System Control Register */

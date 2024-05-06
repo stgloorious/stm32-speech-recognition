@@ -2,23 +2,23 @@
 
 Breakpoint=/home/stefan/mlonuc/project/stm32-speech-recognition/src/main.c:128:6, State=BP_STATE_DISABLED
 Breakpoint=/home/stefan/mlonuc/project/stm32-speech-recognition/src/interrupts.c:85:5, State=BP_STATE_ON
-OpenDocument="stm32l4xx_hal.c", FilePath="/home/stefan/mlonuc/project/stm32-speech-recognition/third_party/STM32CubeL4/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal.c", Line=402
+OpenDocument="main.c", FilePath="/home/stefan/mlonuc/project/stm32-speech-recognition/src/main.c", Line=35
 OpenDocument="stm32l4xx_hal_uart.c", FilePath="/home/stefan/mlonuc/project/stm32-speech-recognition/third_party/STM32CubeL4/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_uart.c", Line=3534
 OpenDocument="startup_stm32l475xx.s", FilePath="/home/stefan/mlonuc/project/stm32-speech-recognition/third_party/STM32CubeL4/Drivers/CMSIS/Device/ST/STM32L4xx/Source/Templates/gcc/startup_stm32l475xx.s", Line=50
 OpenDocument="interrupts.c", FilePath="/home/stefan/mlonuc/project/stm32-speech-recognition/src/interrupts.c", Line=71
-OpenDocument="main.c", FilePath="/home/stefan/mlonuc/project/stm32-speech-recognition/src/main.c", Line=47
+OpenDocument="stm32l4xx_hal.c", FilePath="/home/stefan/mlonuc/project/stm32-speech-recognition/third_party/STM32CubeL4/Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal.c", Line=327
 OpenToolbar="Debug", Floating=0, x=0, y=0
-OpenWindow="Call Stack", DockArea=RIGHT, x=1, y=0, w=216, h=681, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Registers 1", DockArea=RIGHT, x=2, y=0, w=771, h=681, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, FilteredItems=[], RefreshRate=1
-OpenWindow="Disassembly", DockArea=RIGHT, x=0, y=0, w=742, h=681, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Break & Tracepoints", DockArea=LEFT, x=0, y=1, w=792, h=285, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VectorCatchIndexMask=254
-OpenWindow="Memory 1", DockArea=BOTTOM, x=1, y=0, w=751, h=658, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=1, EditorAddress=0x0
+OpenWindow="Call Stack", DockArea=RIGHT, x=1, y=0, w=155, h=681, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Registers 1", DockArea=RIGHT, x=2, y=0, w=555, h=681, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, FilteredItems=[], RefreshRate=1
+OpenWindow="Disassembly", DockArea=RIGHT, x=0, y=0, w=534, h=681, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Break & Tracepoints", DockArea=LEFT, x=0, y=1, w=306, h=281, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VectorCatchIndexMask=254
+OpenWindow="Memory 1", DockArea=BOTTOM, x=1, y=0, w=752, h=658, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=1, EditorAddress=0x0
 OpenWindow="Global Data", DockArea=BOTTOM, x=3, y=0, w=896, h=658, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 OpenWindow="Local Data", DockArea=BOTTOM, x=4, y=0, w=532, h=658, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 OpenWindow="Watched Data 1", DockArea=BOTTOM, x=0, y=0, w=674, h=658, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Functions", DockArea=LEFT, x=0, y=2, w=792, h=192, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Call Graph", DockArea=LEFT, x=0, y=0, w=792, h=192, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Console", DockArea=BOTTOM, x=2, y=0, w=559, h=658, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Functions", DockArea=LEFT, x=0, y=2, w=306, h=194, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Call Graph", DockArea=LEFT, x=0, y=0, w=306, h=194, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Console", DockArea=BOTTOM, x=2, y=0, w=558, h=658, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 SmartViewPlugin="", Page="", Toolbar="Hidden", Window="SmartView 1"
 TableHeader="Global Data", SortCol="Location", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Location";"Size";"Type";"Scope"], ColWidths=[197;148;99;99;207;130]
 TableHeader="Vector Catches", SortCol="", SortOrder="ASCENDING", VisibleCols=["";"Vector Catch";"Description"], ColWidths=[50;300;500]
@@ -28,7 +28,7 @@ TableHeader="Functions", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Na
 TableHeader="Call Stack", SortCol="Function", SortOrder="ASCENDING", VisibleCols=["Function";"Stack Frame";"Source";"PC";"Return Address";"Stack Used"], ColWidths=[190;317;168;100;266;100]
 TableHeader="Call Graph", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Stack Total";"Stack Local";"Code Total";"Code Local";"Depth";"Called From"], ColWidths=[952;100;100;100;100;100;100]
 TableHeader="Power Sampling", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
-TableHeader="Registers 1", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Description"], ColWidths=[193;135;443]
+TableHeader="Registers 1", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Description"], ColWidths=[193;135;259]
 TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[144;100;154;276]
 TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
 TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[200;100;100;1053]

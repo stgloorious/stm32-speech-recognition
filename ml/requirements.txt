@@ -1,0 +1,7 @@
+datasets
+librosa
+tensorflow
+matplotlib
+scipy
+numpy
+seaborn

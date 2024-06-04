@@ -4,6 +4,6 @@ debug/ozone.*
 *.swp
 *.xlsx*
 *.md.pdf
-ml/*.keras
+ml/model*
 ml/data
 ml/venv

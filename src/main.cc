@@ -31,7 +31,7 @@ limitations under the License.
 #include "mic.h"
 int dfsdm_conversion_done;
 
-const int kTensorArenaSize = 64 * 1024;
+const int kTensorArenaSize = 86 * 1024;
 alignas(16) static uint8_t tensor_arena[kTensorArenaSize] = { 0x55 };
 
 #define DEBUG_PRINTF(...)            \

@@ -141,12 +141,12 @@ if not os.path.exists('model.keras'):
         # Normalize.
         norm_layer,
         layers.Conv2D(64, 3, activation='relu'),
-        layers.Conv2D(4, 3, activation='relu'),
+        layers.Conv2D(32, 3, activation='relu'),
         layers.Conv2D(2, 3, activation='relu'),
         layers.MaxPooling2D(),
         layers.Dropout(0.25),
         layers.Flatten(),
-        layers.Dense(16, activation='relu'),
+        layers.Dense(64, activation='relu'),
         layers.Dropout(0.5),
         layers.Dense(num_labels),
     ])
@@ -189,6 +189,7 @@ if not os.path.exists('model.keras'):
     os.system('xxd -i model.tflite > model.cc')
     os.system('sed -i \'s/unsigned char/const unsigned char/\' model.cc')
     os.system('sed -i \'1i #include <model_tflite.h>\n\' model.cc')
+    os.system('cp model.cc ../src/models/')
 
     #metrics = history.history
     #plt.figure(figsize=(16,6))
@@ -271,6 +272,7 @@ os.system('xxd -i sample_input.bin > sample_input.cc')
 os.system('sed -i \'s/unsigned char/const unsigned char/\' sample_input.cc')
 os.system('sed -i \'s/unsigned int/const unsigned int/\' sample_input.cc')
 os.system('sed -i \'1i #include <sample_input.h>\n\' sample_input.cc')
+os.system('cp sample_input.cc ../src/models/')
 
 print(f'input shape {preprocessed_input_data.shape}')
 print(f'input bytes {len(preprocessed_input_data)}')

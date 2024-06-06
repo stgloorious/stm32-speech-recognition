@@ -7,3 +7,5 @@ debug/ozone.*
 ml/model*
 ml/data
 ml/venv
+src/models
+include/models

@@ -9,4 +9,3 @@ ml/sample_input.*
 ml/data
 ml/venv
 src/models
-include/models

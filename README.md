@@ -12,6 +12,7 @@ You only need some essentials and the `arm-none-eabi` toolchain.
 On Ubuntu 23.10 and similar this should be enough to build the project:
 
 ~~~
+sudo apt-get update
 sudo apt-get install build-essential cmake gcc-arm-none-eabi python3-numpy python3-pil unzip
 ~~~
 

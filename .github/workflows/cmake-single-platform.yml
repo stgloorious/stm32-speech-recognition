@@ -35,6 +35,7 @@ jobs:
     - name: Train
       run: |
         cd ml
+        source venv/bin/activate
         python train.py
 
     - name: Build

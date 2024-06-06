@@ -13,169 +13,190 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#include <math.h>
+#include <stdio.h>
+#include <string.h>
 
-#include "tensorflow/lite/core/c/common.h"
-#include "models/hello_world_float_model_data.h"
-#include "models/hello_world_int8_model_data.h"
-#include "tensorflow/lite/micro/micro_interpreter.h"
-#include "tensorflow/lite/micro/micro_log.h"
-#include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
-#include "tensorflow/lite/micro/micro_profiler.h"
-#include "tensorflow/lite/micro/recording_micro_interpreter.h"
-#include "tensorflow/lite/micro/system_setup.h"
-#include "tensorflow/lite/schema/schema_generated.h"
+#include <models/model_tflite.h>
+#include <models/sample_input.h>
+#include <tensorflow/lite/core/c/common.h>
+#include <tensorflow/lite/micro/micro_interpreter.h>
+#include <tensorflow/lite/micro/micro_log.h>
+#include <tensorflow/lite/micro/micro_mutable_op_resolver.h>
+#include <tensorflow/lite/micro/micro_op_resolver.h>
+#include <tensorflow/lite/micro/micro_profiler.h>
+#include <tensorflow/lite/micro/recording_micro_interpreter.h>
+#include <tensorflow/lite/micro/system_setup.h>
+#include <tensorflow/lite/schema/schema_generated.h>
 
 #include "mic.h"
 int dfsdm_conversion_done;
 
-namespace
-{
-using HelloWorldOpResolver = tflite::MicroMutableOpResolver<1>;
+const int kTensorArenaSize = 64 * 1024;
+alignas(16) static uint8_t tensor_arena[kTensorArenaSize] = { 0x55 };
 
-TfLiteStatus RegisterOps(HelloWorldOpResolver &op_resolver)
-{
-	TF_LITE_ENSURE_STATUS(op_resolver.AddFullyConnected());
-	return kTfLiteOk;
-}
-} // namespace
-
-TfLiteStatus ProfileMemoryAndLatency()
-{
-	tflite::MicroProfiler profiler;
-	HelloWorldOpResolver op_resolver;
-	TF_LITE_ENSURE_STATUS(RegisterOps(op_resolver));
-
-	// Arena size just a round number. The exact arena usage can be determined
-	// using the RecordingMicroInterpreter.
-	constexpr int kTensorArenaSize = 3000;
-	uint8_t tensor_arena[kTensorArenaSize];
-	constexpr int kNumResourceVariables = 24;
-
-	tflite::RecordingMicroAllocator *allocator(
-		tflite::RecordingMicroAllocator::Create(tensor_arena,
-							kTensorArenaSize));
-	tflite::RecordingMicroInterpreter interpreter(
-		tflite::GetModel(g_hello_world_float_model_data), op_resolver,
-		allocator,
-		tflite::MicroResourceVariables::Create(allocator,
-						       kNumResourceVariables),
-		&profiler);
-
-	TF_LITE_ENSURE_STATUS(interpreter.AllocateTensors());
-	TFLITE_CHECK_EQ(interpreter.inputs_size(), 1);
-	interpreter.input(0)->data.f[0] = 1.f;
-	TF_LITE_ENSURE_STATUS(interpreter.Invoke());
-
-	MicroPrintf(""); // Print an empty new line
-	profiler.LogTicksPerTagCsv();
-
-	MicroPrintf(""); // Print an empty new line
-	interpreter.GetMicroAllocator().PrintAllocations();
-	return kTfLiteOk;
-}
-
-TfLiteStatus LoadFloatModelAndPerformInference()
-{
-	const tflite::Model *model =
-		::tflite::GetModel(g_hello_world_float_model_data);
-	TFLITE_CHECK_EQ(model->version(), TFLITE_SCHEMA_VERSION);
-
-	HelloWorldOpResolver op_resolver;
-	TF_LITE_ENSURE_STATUS(RegisterOps(op_resolver));
-
-	// Arena size just a round number. The exact arena usage can be determined
-	// using the RecordingMicroInterpreter.
-	constexpr int kTensorArenaSize = 3000;
-	uint8_t tensor_arena[kTensorArenaSize];
-
-	tflite::MicroInterpreter interpreter(model, op_resolver, tensor_arena,
-					     kTensorArenaSize);
-	TF_LITE_ENSURE_STATUS(interpreter.AllocateTensors());
-
-	// Check if the predicted output is within a small range of the
-	// expected output
-	float epsilon = 0.05f;
-	constexpr int kNumTestValues = 4;
-	float golden_inputs[kNumTestValues] = { 0.f, 1.f, 3.f, 5.f };
-
-	for (int i = 0; i < kNumTestValues; ++i) {
-		interpreter.input(0)->data.f[0] = golden_inputs[i];
-		TF_LITE_ENSURE_STATUS(interpreter.Invoke());
-		float y_pred = interpreter.output(0)->data.f[0];
-		TFLITE_CHECK_LE(abs(sin(golden_inputs[i]) - y_pred), epsilon);
+#define DEBUG_PRINTF(...)            \
+	{                            \
+		printf("[i] ");      \
+		printf(__VA_ARGS__); \
 	}
 
-	return kTfLiteOk;
-}
-
-TfLiteStatus LoadQuantModelAndPerformInference()
-{
-	// Map the model into a usable data structure. This doesn't involve any
-	// copying or parsing, it's a very lightweight operation.
-	const tflite::Model *model =
-		::tflite::GetModel(g_hello_world_int8_model_data);
-	TFLITE_CHECK_EQ(model->version(), TFLITE_SCHEMA_VERSION);
-
-	HelloWorldOpResolver op_resolver;
-	TF_LITE_ENSURE_STATUS(RegisterOps(op_resolver));
-
-	// Arena size just a round number. The exact arena usage can be determined
-	// using the RecordingMicroInterpreter.
-	constexpr int kTensorArenaSize = 3000;
-	uint8_t tensor_arena[kTensorArenaSize];
-
-	tflite::MicroInterpreter interpreter(model, op_resolver, tensor_arena,
-					     kTensorArenaSize);
-
-	TF_LITE_ENSURE_STATUS(interpreter.AllocateTensors());
-
-	TfLiteTensor *input = interpreter.input(0);
-	TFLITE_CHECK_NE(input, nullptr);
-
-	TfLiteTensor *output = interpreter.output(0);
-	TFLITE_CHECK_NE(output, nullptr);
-
-	float output_scale = output->params.scale;
-	int output_zero_point = output->params.zero_point;
-
-	// Check if the predicted output is within a small range of the
-	// expected output
-	float epsilon = 0.05;
-
-	constexpr int kNumTestValues = 4;
-	float golden_inputs_float[kNumTestValues] = { 0.77, 1.57, 2.3, 3.14 };
-
-	// The int8 values are calculated using the following formula
-	// (golden_inputs_float[i] / input->params.scale + input->params.scale)
-	int8_t golden_inputs_int8[kNumTestValues] = { -96, -63, -34, 0 };
-
-	for (int i = 0; i < kNumTestValues; ++i) {
-		input->data.int8[0] = golden_inputs_int8[i];
-		TF_LITE_ENSURE_STATUS(interpreter.Invoke());
-		float y_pred = (output->data.int8[0] - output_zero_point) *
-			       output_scale;
-		TFLITE_CHECK_LE(abs(sin(golden_inputs_float[i]) - y_pred),
-				epsilon);
+#define RAW_PRINTF(...)              \
+	{                            \
+		printf(__VA_ARGS__); \
 	}
 
-	return kTfLiteOk;
+#define SUCCESS_PRINTF(...)             \
+	{                               \
+		printf("\e[0;32m[*] "); \
+		printf(__VA_ARGS__);    \
+		printf("\e[0m");        \
+	}
+
+void PrintModelDetails(const tflite::Model *model)
+{
+	DEBUG_PRINTF("TFlite schema version: %lu\n", model->version());
+	assert(model->version() == TFLITE_SCHEMA_VERSION);
+
+	// Primary subgraph usually at index 0
+	const tflite::SubGraph *subgraph = model->subgraphs()->Get(0);
+
+	DEBUG_PRINTF("Number of tensors: %lu\n", subgraph->tensors()->size());
+	for (size_t i = 0; i < subgraph->tensors()->size(); i++) {
+		const tflite::Tensor *tensor = subgraph->tensors()->Get(i);
+		DEBUG_PRINTF(
+			"    %u: %s\n", i,
+			(char *)tflite::EnumNameTensorType(tensor->type()));
+	}
+	DEBUG_PRINTF("Number of operators: %lu\n",
+		     subgraph->operators()->size());
+
+	// Iterate over operators and print their details
+	for (size_t i = 0; i < subgraph->operators()->size(); i++) {
+		const tflite::Operator *op = subgraph->operators()->Get(i);
+		const tflite::OperatorCode *op_code =
+			model->operator_codes()->Get(op->opcode_index());
+
+		const char *op_name = tflite::EnumNameBuiltinOperator(
+			static_cast<tflite::BuiltinOperator>(
+				op_code->builtin_code()));
+
+		DEBUG_PRINTF("    %u: %s\n", i, op_name);
+
+		DEBUG_PRINTF("        Inputs: ");
+		for (size_t j = 0; j < op->inputs()->size(); j++) {
+			printf("%lu ", op->inputs()->Get(j));
+		}
+		printf("\n");
+
+		DEBUG_PRINTF("        Outputs: ");
+		for (size_t j = 0; j < op->outputs()->size(); j++) {
+			printf("%lu ", op->outputs()->Get(j));
+		}
+		printf("\n");
+	}
+}
+
+void print_shape(TfLiteTensor *tensor)
+{
+	DEBUG_PRINTF("%s bytes = %u\n", tensor->name, tensor->bytes);
+	DEBUG_PRINTF("%s shape = (", tensor->name);
+	for (int i = 0; i < tensor->dims->size; i++) {
+		RAW_PRINTF("%u", tensor->dims->data[i]);
+		if (i != tensor->dims->size - 1) {
+			RAW_PRINTF(", ");
+		}
+	}
+	RAW_PRINTF(")\n");
 }
 
 int main(int argc, char *argv[])
 {
 	tflite::InitializeTarget();
 	speech::mic microphone;
-	microphone.init();
+	/*	microphone.init();
 
 	while (!dfsdm_conversion_done)
 		;
 	microphone.dump_recording();
+*/
 
-	/* TODO this crashes, may be a problem with memset */
-	//TF_LITE_ENSURE_STATUS(ProfileMemoryAndLatency());
-	TF_LITE_ENSURE_STATUS(LoadFloatModelAndPerformInference());
-	TF_LITE_ENSURE_STATUS(LoadQuantModelAndPerformInference());
-	MicroPrintf("~~~ALL TESTS PASSED~~~\n");
-	return kTfLiteOk;
+	const tflite::Model *model = tflite::GetModel(model_tflite);
+	DEBUG_PRINTF("Model architecture:\n");
+	DEBUG_PRINTF("==============================================\n");
+	PrintModelDetails(model);
+
+	tflite::MicroMutableOpResolver<8> op_resolver;
+
+	// Not really sure which ops to add
+	if (op_resolver.AddRelu() != kTfLiteOk) {
+		assert(!"Failed to add op");
+	}
+	if (op_resolver.AddConv2D() != kTfLiteOk) {
+		assert(!"Failed to add op");
+	}
+	if (op_resolver.AddMaxPool2D() != kTfLiteOk) {
+		assert(!"Failed to add op");
+	}
+	if (op_resolver.AddReshape() != kTfLiteOk) {
+		assert(!"Failed to add op");
+	}
+	if (op_resolver.AddFullyConnected() != kTfLiteOk) {
+		assert(!"Failed to add op");
+	}
+	if (op_resolver.AddSoftmax() != kTfLiteOk) {
+		assert(!"Failed to add op");
+	}
+	if (op_resolver.AddResizeBilinear() != kTfLiteOk) {
+		assert(!"Failed to add op");
+	}
+	if (op_resolver.AddQuantize() != kTfLiteOk) {
+		assert(!"Failed to add op");
+	}
+
+	DEBUG_PRINTF("Added operations to OpsResolver.\n");
+
+	// Interpreter
+	tflite::MicroInterpreter interpreter(model, op_resolver, tensor_arena,
+					     kTensorArenaSize);
+	DEBUG_PRINTF("MicroInterpreter initialized.\n");
+
+	if (interpreter.AllocateTensors() != kTfLiteOk) {
+		assert(!"AllocateTensors() failed\n");
+	}
+	DEBUG_PRINTF("MicroInterpreter tensors allocated.\n");
+
+	// Prepare input tensor
+	TfLiteTensor *input = interpreter.input(0);
+	input->dims->size = 4;
+	input->dims->data[0] = 1;
+	input->dims->data[1] = 124;
+	input->dims->data[2] = 129;
+	input->dims->data[3] = 1;
+	input->bytes = sample_input_bin_len;
+	const char input_name[] = "Input";
+	input->name = input_name;
+	memcpy(input->data.uint8, sample_input_bin, input->bytes);
+	print_shape(input);
+
+	// Perform inference
+	DEBUG_PRINTF("Running inference...\n");
+	if (interpreter.Invoke() != kTfLiteOk) {
+		assert(!"Inference failed.\n");
+	}
+
+	// Get output tensor
+	TfLiteTensor *output = interpreter.output(0);
+	const char output_name[] = "Output";
+	output->name = output_name;
+
+	print_shape(output);
+	const char* labels[] = {"NO", "YES"};
+	for (int i = 0; i < output->dims->data[output->dims->size - 1]; i++) {
+		SUCCESS_PRINTF("Prediction %4s: %6.2f %%\n", labels[i],
+			       tflite::GetTensorData<uint8_t>(output)[i]/2.55);
+	}
+
+
+	while (1)
+		;
 }

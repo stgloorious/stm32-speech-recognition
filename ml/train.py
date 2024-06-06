@@ -168,8 +168,17 @@ if not os.path.exists('model.keras'):
     )
     model.save('model.keras')
 
+    def representative_dataset():
+        for input_value, _ in train_spectrogram_ds.take(100):
+            yield [input_value]
+
     # Convert the model.
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+    converter.representative_dataset = representative_dataset
+    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+    converter.inference_input_type = tf.uint8
+    converter.inference_output_type = tf.uint8
     tflite_model = converter.convert()
 
     # Save the model.
@@ -179,6 +188,7 @@ if not os.path.exists('model.keras'):
     # Convert the model to a c array
     os.system('xxd -i model.tflite > model.cc')
     os.system('sed -i \'s/unsigned char/const unsigned char/\' model.cc')
+    os.system('sed -i \'1i #include <model_tflite.h>\n\' model.cc')
 
     #metrics = history.history
     #plt.figure(figsize=(16,6))
@@ -196,30 +206,37 @@ if not os.path.exists('model.keras'):
     #plt.xlabel('Epoch')
     #plt.ylabel('Accuracy [%]')
 
+    # ## Evaluate the model performance
+    model.evaluate(test_spectrogram_ds, return_dict=True)
+
+    # ### Display a confusion matrix
+    y_pred = model.predict(test_spectrogram_ds)
+    y_pred = tf.argmax(y_pred, axis=1)
+    y_true = tf.concat(list(test_spectrogram_ds.map(lambda s,lab: lab)), axis=0)
+    confusion_mtx = tf.math.confusion_matrix(y_true, y_pred)
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(confusion_mtx,
+                xticklabels=label_names,
+                yticklabels=label_names,
+                annot=True, fmt='g')
+    plt.xlabel('Prediction')
+    plt.ylabel('Label')
+    plt.show()
+
 else:
     model = tf.keras.models.load_model('model.keras')
-
-# ## Evaluate the model performance
-model.evaluate(test_spectrogram_ds, return_dict=True)
-
-# ### Display a confusion matrix
-y_pred = model.predict(test_spectrogram_ds)
-y_pred = tf.argmax(y_pred, axis=1)
-y_true = tf.concat(list(test_spectrogram_ds.map(lambda s,lab: lab)), axis=0)
-confusion_mtx = tf.math.confusion_matrix(y_true, y_pred)
-plt.figure(figsize=(10, 8))
-sns.heatmap(confusion_mtx,
-            xticklabels=label_names,
-            yticklabels=label_names,
-            annot=True, fmt='g')
-plt.xlabel('Prediction')
-plt.ylabel('Label')
-plt.show()
 
 # ## Run inference on an audio file
 # Finally, verify the model's prediction output using an input audio file of someone saying "no". How well does your model perform?
 
-x = data_dir/'no/01bb6a2a_nohash_0.wav'
+#x = data_dir/'no/01bb6a2a_nohash_0.wav'
+#x = data_dir/'yes/5184ed3e_nohash_0.wav'
+#x = data_dir/'no/0cd323ec_nohash_1.wav'
+x = data_dir/'no/2da58b32_nohash_4.wav'
+#x = data_dir/'yes/1a673010_nohash_0.wav'
+#x = data_dir/'yes/01bb6a2a_nohash_4.wav'
+#x = data_dir/'left/0e5193e6_nohash_0.wav'
+#x = data_dir/'up/0d2bcf9d_nohash_0.wav'
 x = tf.io.read_file(str(x))
 x, sample_rate = tf.audio.decode_wav(x, desired_channels=1, desired_samples=16000,)
 x = tf.squeeze(x, axis=-1)
@@ -228,11 +245,40 @@ x = get_spectrogram(x)
 x = x[tf.newaxis,...]
 
 prediction = model(x)
-x_labels = label_names
-plt.bar(x_labels, tf.nn.softmax(prediction[0]))
-plt.title('No')
-plt.show()
+values = tf.nn.softmax(prediction[0])
+print('Prediction of float model:')
+label_names = ['no', 'yes']
+for i in range(len(label_names)):
+    print(f'{label_names[i]}: {values[i]:.2%}')
 
-display.display(display.Audio(waveform, rate=16000))
 
-# As the output suggests, your model should have recognized the audio command as "no".
+# Load the TFLite model
+with open('model.tflite', 'rb') as f:
+    tflite_model = f.read()
+
+# Initialize the TFLite interpreter
+interpreter = tf.lite.Interpreter(model_content=tflite_model)
+interpreter.allocate_tensors()
+
+# Input data
+input_data = np.array(x)
+preprocessed_input_data = (input_data * 256).astype('uint8')
+
+with open('sample_input.bin', 'wb') as f:
+    f.write(preprocessed_input_data)
+
+os.system('xxd -i sample_input.bin > sample_input.cc')
+os.system('sed -i \'s/unsigned char/const unsigned char/\' sample_input.cc')
+os.system('sed -i \'s/unsigned int/const unsigned int/\' sample_input.cc')
+os.system('sed -i \'1i #include <sample_input.h>\n\' sample_input.cc')
+
+print(f'input shape {preprocessed_input_data.shape}')
+print(f'input bytes {len(preprocessed_input_data)}')
+
+# Run inference
+input_data = interpreter.set_tensor(interpreter.get_input_details()[0]['index'], preprocessed_input_data)
+interpreter.invoke()
+output_data = interpreter.get_tensor(interpreter.get_output_details()[0]['index'])
+print(f'output shape {output_data.shape}')
+print(f'output bytes {len(output_data)}')
+print(f'Output: {output_data}')

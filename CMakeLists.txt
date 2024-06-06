@@ -18,6 +18,9 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
+# For clangd and YouCompleteMe
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON )
+
 # Cortex M4 with FPU
 add_compile_options(-mcpu=${CMAKE_SYSTEM_PROCESSOR})
 add_compile_options(-mfpu=fpv4-sp-d16 -mfloat-abi=hard)
@@ -40,6 +43,15 @@ add_compile_options(-O2 -ggdb)
 
 # Defines
 add_compile_options(-DSTM32L475xx -DDEBUG)
+
+# Security/Debugging
+add_compile_options(-fstack-protector-all)
+
+# This is a workaround for Vim YCM plugin not being able to locate system
+# headers. It should have no effect on the build.
+include_directories(/opt/gcc-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/13.2.1/include)
+include_directories(/opt/gcc-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/13.2.1/include-fixed)
+include_directories(/opt/gcc-arm-none-eabi/bin/../lib/gcc/arm-none-eabi/13.2.1/../../../../arm-none-eabi/include)
 
 # Hardware/HAL includes
 include_directories(include)

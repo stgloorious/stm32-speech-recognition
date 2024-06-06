@@ -1,7 +1,9 @@
 datasets
+ipython
+ipywidgets
 librosa
-tensorflow==2.15.0
 matplotlib
-scipy
 numpy
+scipy
 seaborn
+tensorflow==2.15.0

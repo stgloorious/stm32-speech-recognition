@@ -35,14 +35,15 @@
 
 UART_HandleTypeDef uart_hd_debug_uart;
 
-#define UART_RX_FIFO_SIZE 64
-static uint8_t uart_rx_fifo[UART_RX_FIFO_SIZE];
-static uint8_t uart_rx_fifo_enqueue = 0;
-static uint8_t uart_rx_fifo_dequeue = 1;
+#define UART_RX_FIFO_SIZE 1024
+volatile static uint8_t uart_rx_fifo[UART_RX_FIFO_SIZE];
+volatile static uint8_t uart_rx_fifo_enqueue = 0;
+volatile static uint8_t uart_rx_fifo_dequeue = 1;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *uart_hd)
 {
-	HAL_UART_Receive_IT(uart_hd, uart_rx_fifo + uart_rx_fifo_enqueue, 1);
+	HAL_UART_Receive_IT(uart_hd,
+			    (uint8_t *)uart_rx_fifo + uart_rx_fifo_enqueue, 1);
 	uart_rx_fifo_enqueue = (uart_rx_fifo_enqueue + 1) % UART_RX_FIFO_SIZE;
 }
 
@@ -76,9 +77,6 @@ int _read(int fd, uint8_t *buf, int cnt)
 		buf[i++] = uart_rx_fifo[uart_rx_fifo_dequeue - 1];
 		uart_rx_fifo_dequeue =
 			(uart_rx_fifo_dequeue + 1) % UART_RX_FIFO_SIZE;
-		if (buf[i] == '\n') {
-			break;
-		}
 		if (i == cnt) {
 			break;
 		}
@@ -130,7 +128,7 @@ int uart_debug_init()
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
 
 	HAL_UART_Receive_IT(&uart_hd_debug_uart,
-			    uart_rx_fifo + uart_rx_fifo_enqueue, 1);
+			    (uint8_t *)uart_rx_fifo + uart_rx_fifo_enqueue, 1);
 	return 0;
 }
 

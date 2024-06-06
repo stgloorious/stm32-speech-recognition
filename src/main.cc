@@ -15,6 +15,7 @@ limitations under the License.
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <models/model_tflite.h>
 #include <models/sample_input.h>
@@ -28,10 +29,13 @@ limitations under the License.
 #include <tensorflow/lite/micro/system_setup.h>
 #include <tensorflow/lite/schema/schema_generated.h>
 
+#include <zmodem_helper.h>
+
 #include "mic.h"
 int dfsdm_conversion_done;
 
-const int kTensorArenaSize = 86 * 1024;
+//const int kTensorArenaSize = 86 * 1024;
+const int kTensorArenaSize = 32 * 1024;
 alignas(16) static uint8_t tensor_arena[kTensorArenaSize] = { 0x55 };
 
 #define DEBUG_PRINTF(...)            \
@@ -120,6 +124,15 @@ int main(int argc, char *argv[])
 	microphone.dump_recording();
 */
 
+	//zmodem_recv((uint8_t*)model_tflite, 128);
+	static uint8_t buf[256];
+	memset(buf, 0, 256);
+	uint32_t len = zmodem_recv(buf, 256);
+	RAW_PRINTF("\n\n\n");
+
+	DEBUG_PRINTF("Read %lu bytes\n", len);
+	RAW_PRINTF("%s\n", buf);
+
 	const tflite::Model *model = tflite::GetModel(model_tflite);
 	DEBUG_PRINTF("Model architecture:\n");
 	DEBUG_PRINTF("==============================================\n");
@@ -190,13 +203,10 @@ int main(int argc, char *argv[])
 	output->name = output_name;
 
 	print_shape(output);
-	const char* labels[] = {"NO", "YES"};
+	const char *labels[] = { "NO", "YES" };
 	for (int i = 0; i < output->dims->data[output->dims->size - 1]; i++) {
 		SUCCESS_PRINTF("Prediction %4s: %6.2f %%\n", labels[i],
-			       tflite::GetTensorData<uint8_t>(output)[i]/2.55);
+			       tflite::GetTensorData<uint8_t>(output)[i] /
+				       2.55);
 	}
-
-
-	while (1)
-		;
 }

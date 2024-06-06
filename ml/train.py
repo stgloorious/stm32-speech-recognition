@@ -189,7 +189,7 @@ if not os.path.exists('model.keras'):
     os.system('sed -i \'s/unsigned char/const unsigned char/\' model.cc')
     os.system('sed -i \'1i #include <model_tflite.h>\n\' model.cc')
 
-    if not os.path.exists('../src/models')
+    if not os.path.exists('../src/models'):
         os.makedirs('../src/models')
     shutil.copyfile('model.cc', '../src/models/model.cc')
 
@@ -275,7 +275,7 @@ os.system('sed -i \'s/unsigned char/const unsigned char/\' sample_input.cc')
 os.system('sed -i \'s/unsigned int/const unsigned int/\' sample_input.cc')
 os.system('sed -i \'1i #include <sample_input.h>\n\' sample_input.cc')
 
-if not os.path.exists('../src/models')
+if not os.path.exists('../src/models'):
     os.makedirs('../src/models')
 shutil.copyfile('sample_input.cc', '../src/models/sample_input.cc')
 

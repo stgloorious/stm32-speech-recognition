@@ -5,6 +5,7 @@ debug/ozone.*
 *.xlsx*
 *.md.pdf
 ml/model*
+ml/sample_input.*
 ml/data
 ml/venv
 src/models

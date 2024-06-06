@@ -30,6 +30,10 @@ The model can be trained by running `train.py`. This will also copy it
 to `src/models`, where it will be compiled into the firmware in the next
 step.
 
+~~~
+python train.py
+~~~
+
 ## Build
 With the model being trained, you can proceed to build the code.
 ~~~

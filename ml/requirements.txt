@@ -1,9 +1,5 @@
-datasets
-ipython
-ipywidgets
-librosa
-matplotlib
-numpy
-scipy
-seaborn
+matplotlib==3.8.4
+numpy==1.26.4
+scipy==1.12.0
+seaborn==0.13.2
 tensorflow==2.15.0

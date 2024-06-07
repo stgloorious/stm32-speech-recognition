@@ -4,3 +4,6 @@
 [submodule "third_party/tflite-micro"]
 	path = third_party/tflite-micro
 	url = https://github.com/tensorflow/tflite-micro.git
+[submodule "third_party/libcrc"]
+	path = third_party/libcrc
+	url = https://github.com/lammertb/libcrc.git

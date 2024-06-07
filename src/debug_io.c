@@ -35,15 +35,17 @@
 
 UART_HandleTypeDef uart_hd_debug_uart;
 
-#define UART_RX_FIFO_SIZE 64
-static uint8_t uart_rx_fifo[UART_RX_FIFO_SIZE];
-static uint8_t uart_rx_fifo_enqueue = 0;
-static uint8_t uart_rx_fifo_dequeue = 1;
+#define UART_RX_FIFO_SIZE 16
+volatile static uint8_t uart_rx_fifo[UART_RX_FIFO_SIZE];
+volatile static uint8_t uart_rx_fifo_enqueue = 0;
+volatile static uint8_t uart_rx_fifo_dequeue = 0;
+volatile static uint32_t uart_rx_fifo_count = 0;
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *uart_hd)
 {
-	HAL_UART_Receive_IT(uart_hd, uart_rx_fifo + uart_rx_fifo_enqueue, 1);
 	uart_rx_fifo_enqueue = (uart_rx_fifo_enqueue + 1) % UART_RX_FIFO_SIZE;
+	uart_rx_fifo_count++;
+	HAL_UART_Receive_IT(uart_hd, (uint8_t*)uart_rx_fifo + uart_rx_fifo_enqueue, 1);
 }
 
 /* attach the _read,_write syscall to debug UART */
@@ -67,18 +69,26 @@ int _write(int fd, const void *buf, int cnt)
 
 int _read(int fd, uint8_t *buf, int cnt)
 {
-	/* wait as long as fifo is empty */
-	while (uart_rx_fifo_enqueue == uart_rx_fifo_dequeue)
-		;
+	size_t start = HAL_GetTick();
+	const size_t timeout = 500;
+
+	if (fd != STDIN_FILENO){
+		return 0;
+	}
+	/* wait as long as fifo is empty or timeout expires */
+	while (uart_rx_fifo_count == 0){
+		if ((HAL_GetTick() - start) > timeout){
+			return 0;
+		}
+	}
 
 	int i = 0;
-	while (uart_rx_fifo_enqueue != uart_rx_fifo_dequeue) {
-		buf[i++] = uart_rx_fifo[uart_rx_fifo_dequeue - 1];
+	while (uart_rx_fifo_count > 0) {
+		// Read at the dequeue index
+		buf[i++] = uart_rx_fifo[uart_rx_fifo_dequeue];
 		uart_rx_fifo_dequeue =
 			(uart_rx_fifo_dequeue + 1) % UART_RX_FIFO_SIZE;
-		if (buf[i] == '\n') {
-			break;
-		}
+		uart_rx_fifo_count--;
 		if (i == cnt) {
 			break;
 		}
@@ -129,8 +139,8 @@ int uart_debug_init()
 	HAL_NVIC_SetPriority(USART1_IRQn, 10, 10);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
 
-	HAL_UART_Receive_IT(&uart_hd_debug_uart,
-			    uart_rx_fifo + uart_rx_fifo_enqueue, 1);
+	HAL_UART_Receive_IT(&uart_hd_debug_uart, (uint8_t*)uart_rx_fifo +
+			uart_rx_fifo_enqueue, 1);
 	return 0;
 }
 

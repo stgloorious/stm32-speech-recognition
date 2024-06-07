@@ -231,9 +231,9 @@ else:
 # Finally, verify the model's prediction output using an input audio file of someone saying "no". How well does your model perform?
 
 #x = data_dir/'no/01bb6a2a_nohash_0.wav'
-#x = data_dir/'yes/5184ed3e_nohash_0.wav'
+x = data_dir/'yes/5184ed3e_nohash_0.wav'
 #x = data_dir/'no/0cd323ec_nohash_1.wav'
-x = data_dir/'no/2da58b32_nohash_4.wav'
+#x = data_dir/'no/2da58b32_nohash_4.wav'
 #x = data_dir/'yes/1a673010_nohash_0.wav'
 #x = data_dir/'yes/01bb6a2a_nohash_4.wav'
 #x = data_dir/'left/0e5193e6_nohash_0.wav'
@@ -267,15 +267,6 @@ preprocessed_input_data = (input_data * 256).astype('uint8')
 
 with open('sample_input.bin', 'wb') as f:
     f.write(preprocessed_input_data)
-
-os.system('xxd -i sample_input.bin > sample_input.cc')
-os.system('sed -i \'s/unsigned char/const unsigned char/\' sample_input.cc')
-os.system('sed -i \'s/unsigned int/const unsigned int/\' sample_input.cc')
-os.system('sed -i \'1i #include <sample_input.h>\n\' sample_input.cc')
-
-if not os.path.exists('../src/models'):
-    os.makedirs('../src/models')
-shutil.copyfile('sample_input.cc', '../src/models/sample_input.cc')
 
 print(f'input shape {preprocessed_input_data.shape}')
 print(f'input bytes {len(preprocessed_input_data)}')

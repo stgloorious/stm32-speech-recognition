@@ -69,6 +69,9 @@ include_directories(${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite
 include_directories(${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/ruy)
 include_directories(${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads/gemmlowp)
 
+# Libcrc32 includes
+include_directories(${CMAKE_SOURCE_DIR}/third_party/libcrc/include)
+
 # Link
 FILE(GLOB linker_script ld/*.ld)
 add_link_options(-T ${linker_script})
@@ -111,6 +114,17 @@ add_library(tflm
     ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads
 )
 
+# This target generates the CRC32 table required for libcrc32
+# This will NOT be cross-compiled to work around compilation errors,
+# as the generated header is architecture agnostic.
+add_custom_target(gentab32 COMMAND make -C
+	${CMAKE_SOURCE_DIR}/third_party/libcrc tab/gentab32.inc
+)
+
+# This creates the cmake library representation of libcrc
+add_library(crc32 STATIC ${CMAKE_SOURCE_DIR}/third_party/libcrc/src/crc32.c)
+add_dependencies(crc32 gentab32)
+
 # Project sources
 FILE(GLOB demo_srcs src/*.c
 	src/*.cc
@@ -120,7 +134,7 @@ FILE(GLOB demo_srcs src/*.c
 )
 
 add_executable(demo.elf ${demo_srcs})
-target_link_libraries(demo.elf hal tflm)
+target_link_libraries(demo.elf hal tflm crc32)
 
 # st-util wants a binary-only format, not an ELF
 add_custom_target(bin ALL DEPENDS demo.elf

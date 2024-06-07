@@ -15,9 +15,9 @@ limitations under the License.
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <models/model_tflite.h>
-#include <models/sample_input.h>
 #include <tensorflow/lite/core/c/common.h>
 #include <tensorflow/lite/micro/micro_interpreter.h>
 #include <tensorflow/lite/micro/micro_log.h>
@@ -28,11 +28,15 @@ limitations under the License.
 #include <tensorflow/lite/micro/system_setup.h>
 #include <tensorflow/lite/schema/schema_generated.h>
 
+#include <serial.h>
+
 #include "mic.h"
 int dfsdm_conversion_done;
 
-const int kTensorArenaSize = 86 * 1024;
+const int kTensorArenaSize = 48 * 1024;
 alignas(16) static uint8_t tensor_arena[kTensorArenaSize] = { 0x55 };
+
+static char input_tensor[16500];
 
 #define DEBUG_PRINTF(...)            \
 	{                            \
@@ -120,6 +124,9 @@ int main(int argc, char *argv[])
 	microphone.dump_recording();
 */
 
+	size_t input_tensor_len = serial_recv(input_tensor, sizeof(input_tensor));
+	DEBUG_PRINTF("Received %u bytes.\n", input_tensor_len);
+
 	const tflite::Model *model = tflite::GetModel(model_tflite);
 	DEBUG_PRINTF("Model architecture:\n");
 	DEBUG_PRINTF("==============================================\n");
@@ -172,10 +179,10 @@ int main(int argc, char *argv[])
 	input->dims->data[1] = 124;
 	input->dims->data[2] = 129;
 	input->dims->data[3] = 1;
-	input->bytes = sample_input_bin_len;
+	input->bytes = input_tensor_len;
 	const char input_name[] = "Input";
 	input->name = input_name;
-	memcpy(input->data.uint8, sample_input_bin, input->bytes);
+	memcpy(input->data.uint8, input_tensor, input->bytes);
 	print_shape(input);
 
 	// Perform inference

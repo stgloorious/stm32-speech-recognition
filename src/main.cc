@@ -124,9 +124,6 @@ int main(int argc, char *argv[])
 	microphone.dump_recording();
 */
 
-	size_t input_tensor_len = serial_recv(input_tensor, sizeof(input_tensor));
-	DEBUG_PRINTF("Received %u bytes.\n", input_tensor_len);
-
 	const tflite::Model *model = tflite::GetModel(model_tflite);
 	DEBUG_PRINTF("Model architecture:\n");
 	DEBUG_PRINTF("==============================================\n");
@@ -172,38 +169,39 @@ int main(int argc, char *argv[])
 	}
 	DEBUG_PRINTF("MicroInterpreter tensors allocated.\n");
 
-	// Prepare input tensor
-	TfLiteTensor *input = interpreter.input(0);
-	input->dims->size = 4;
-	input->dims->data[0] = 1;
-	input->dims->data[1] = 124;
-	input->dims->data[2] = 129;
-	input->dims->data[3] = 1;
-	input->bytes = input_tensor_len;
-	const char input_name[] = "Input";
-	input->name = input_name;
-	memcpy(input->data.uint8, input_tensor, input->bytes);
-	print_shape(input);
+	while (1){
+		size_t input_tensor_len = serial_recv(input_tensor, sizeof(input_tensor));
+		DEBUG_PRINTF("Received %u bytes.\n", input_tensor_len);
 
-	// Perform inference
-	DEBUG_PRINTF("Running inference...\n");
-	if (interpreter.Invoke() != kTfLiteOk) {
-		assert(!"Inference failed.\n");
+		// Prepare input tensor
+		TfLiteTensor *input = interpreter.input(0);
+		input->dims->size = 4;
+		input->dims->data[0] = 1;
+		input->dims->data[1] = 124;
+		input->dims->data[2] = 129;
+		input->dims->data[3] = 1;
+		input->bytes = input_tensor_len;
+		const char input_name[] = "Input";
+		input->name = input_name;
+		memcpy(input->data.uint8, input_tensor, input->bytes);
+		print_shape(input);
+
+		// Perform inference
+		DEBUG_PRINTF("Running inference...\n");
+		if (interpreter.Invoke() != kTfLiteOk) {
+			assert(!"Inference failed.\n");
+		}
+
+		// Get output tensor
+		TfLiteTensor *output = interpreter.output(0);
+		const char output_name[] = "Output";
+		output->name = output_name;
+
+		print_shape(output);
+		const char* labels[] = {"NO", "YES"};
+		for (int i = 0; i < output->dims->data[output->dims->size - 1]; i++) {
+			SUCCESS_PRINTF("Prediction %4s: %6.2f %%\n", labels[i],
+					   tflite::GetTensorData<uint8_t>(output)[i]/2.55);
+		}
 	}
-
-	// Get output tensor
-	TfLiteTensor *output = interpreter.output(0);
-	const char output_name[] = "Output";
-	output->name = output_name;
-
-	print_shape(output);
-	const char* labels[] = {"NO", "YES"};
-	for (int i = 0; i < output->dims->data[output->dims->size - 1]; i++) {
-		SUCCESS_PRINTF("Prediction %4s: %6.2f %%\n", labels[i],
-			       tflite::GetTensorData<uint8_t>(output)[i]/2.55);
-	}
-
-
-	while (1)
-		;
 }

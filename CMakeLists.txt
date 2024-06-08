@@ -75,6 +75,9 @@ include_directories(${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite
 # Libcrc32 includes
 include_directories(${CMAKE_SOURCE_DIR}/third_party/libcrc/include)
 
+# CMSIS includes
+include_directories(${CMAKE_SOURCE_DIR}/third_party/CMSIS_NN)
+
 # Link
 FILE(GLOB linker_script ld/*.ld)
 add_link_options(-T ${linker_script})
@@ -84,6 +87,32 @@ add_link_options(-mfloat-abi=hard)
 # HAL Library
 FILE(GLOB hal_srcs third_party/STM32CubeL4/Drivers/STM32L4xx_HAL_Driver/Src/*.c)
 add_library(hal STATIC ${hal_srcs})
+
+# CMSIS-NN
+set(LIBCMSISNN_PATH ${CMAKE_BINARY_DIR}/cmsis-nn-prefix/src/cmsis-nn-build/libcmsis-nn.a)
+set(LIBCMSISNN_CXXFLAGS "-mthumb -mcpu=${CMAKE_SYSTEM_PROCESSOR} -mfpu=fpv4-sp-d16 -mfloat-abi=hard -nostdlib")
+
+ExternalProject_Add(cmsis-nn
+	SOURCE_DIR ${CMAKE_SOURCE_DIR}/third_party/CMSIS-NN
+	INSTALL_COMMAND ""
+	CMAKE_ARGS
+	-DCMAKE_CXX_FLAGS=${LIBCMSISNN_CXXFLAGS}
+	-DCMAKE_C_FLAGS=${LIBCMSISNN_CXXFLAGS}
+	-DCMAKE_STATIC_LINKER_FLAGS=
+	-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+	-DCMAKE_ASM_COMPILER=${CMAKE_ASM_COMPILER}
+	-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+)
+add_library(cmsisnn SHARED IMPORTED)
+set_target_properties(cmsisnn PROPERTIES IMPORTED_LOCATION ${LIBCMSISNN_PATH})
+
+# Project sources
+FILE(GLOB demo_srcs src/*.c
+	src/*.cc
+	src/models/*.cc
+	third_party/STM32CubeL4/Drivers/CMSIS/Device/ST/STM32L4xx/Source/Templates/gcc/startup_stm32l475xx.s
+	third_party/STM32CubeL4/Drivers/BSP/B-L475E-IOT01/stm32l475e_iot01.c
+)
 
 # TFLite Library
 FILE(GLOB tflm_srcs
@@ -95,6 +124,7 @@ FILE(GLOB tflm_srcs
 	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/arena_allocator/*.cc
 	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/memory_planner/*.cc
 	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/kernels/*.cc
+	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/kernels/cmsis_nn/*.cc
 	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/kernels/internal/reference/*.cc
 	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/kernels/internal/*.cc
 	${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/kernels/*.cc
@@ -116,6 +146,9 @@ add_library(tflm
     STATIC ${tflm_srcs}
     ${CMAKE_SOURCE_DIR}/third_party/tflite-micro/tensorflow/lite/micro/tools/make/downloads
 )
+# TODO fix -Wunused-variable
+target_compile_options(tflm PRIVATE -DCMSIS_NN -iquote
+	${CMAKE_SOURCE_DIR}/third_party/CMSIS-NN -Wno-unused-variable)
 
 # This target generates the CRC32 table required for libcrc32
 # This will NOT be cross-compiled to work around compilation errors,
@@ -127,22 +160,6 @@ add_custom_target(gentab32 COMMAND make -C
 # This creates the cmake library representation of libcrc
 add_library(crc32 STATIC ${CMAKE_SOURCE_DIR}/third_party/libcrc/src/crc32.c)
 add_dependencies(crc32 gentab32)
-
-# CMSIS-NN
-ExternalProject_Add(cmsis-nn
-	SOURCE_DIR ${CMAKE_SOURCE_DIR}/third_party/CMSIS-NN
-	INSTALL_COMMAND ""
-)
-add_library(cmsisnn SHARED IMPORTED)
-set_target_properties(cmsisnn PROPERTIES IMPORTED_LOCATION
-	${CMAKE_BINARY_DIR}/cmsis-nn-prefix/src/cmsis-nn-build/libcmsis-nn.a)
-# Project sources
-FILE(GLOB demo_srcs src/*.c
-	src/*.cc
-	src/models/*.cc
-	third_party/STM32CubeL4/Drivers/CMSIS/Device/ST/STM32L4xx/Source/Templates/gcc/startup_stm32l475xx.s
-	third_party/STM32CubeL4/Drivers/BSP/B-L475E-IOT01/stm32l475e_iot01.c
-)
 
 add_executable(demo.elf ${demo_srcs})
 target_link_libraries(demo.elf hal tflm crc32 cmsisnn)

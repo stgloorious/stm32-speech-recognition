@@ -55,10 +55,10 @@ if not data_dir.exists():
         curr_dir = os.path.join(data_dir, data)
         all_files = [os.path.join(curr_dir, fn) for fn in os.listdir(curr_dir) if fn.endswith('.wav')]
 
-        # Split into 60% train
-        train_files, val_files = train_test_split(all_files, test_size=0.4, random_state=0)
+        # Split into 75% train
+        train_files, val_files = train_test_split(all_files, test_size=0.25, random_state=0)
 
-        # Split the remaining 40% into 20% validation and 20% test
+        # Split the remaining 25% into 12.5% validation and 12.5% test
         test_files, val_files = train_test_split(val_files, test_size=0.5, random_state=0)
 
         print(f'Number of test files: {len(test_files)}')
@@ -257,10 +257,9 @@ else:
     model = tf.keras.models.load_model('model.keras')
 
 # ## Run inference on an audio file
-# Finally, verify the model's prediction output using an input audio file of someone saying "no". How well does your model perform?
 
-x = data_dir/'test/yes/004ae714_nohash_0.wav'
-x = tf.io.read_file(str(x))
+testfile = os.listdir(data_dir/'test/yes/')[0]
+x = tf.io.read_file(str(os.path.join(data_dir/'test/yes/', testfile)))
 x, sample_rate = tf.audio.decode_wav(x, desired_channels=1, desired_samples=16000,)
 x = tf.squeeze(x, axis=-1)
 waveform = x

@@ -27,6 +27,7 @@ import tensorflow as tf
 
 from tensorflow.keras import layers
 from tensorflow.keras import models
+from sklearn.model_selection import train_test_split
 
 # Set the seed value for experiment reproducibility.
 seed = 42
@@ -37,30 +38,58 @@ DATASET_PATH = 'data/mini_speech_commands'
 
 data_dir = pathlib.Path(DATASET_PATH)
 if not data_dir.exists():
-  tf.keras.utils.get_file(
-      'mini_speech_commands.zip',
-      origin="http://storage.googleapis.com/download.tensorflow.org/data/mini_speech_commands.zip",
-      extract=True,
-      cache_dir='.', cache_subdir='data')
-  # Delete the unwanted parts of the dataset
-  shutil.rmtree(os.path.join(data_dir, 'left'))
-  shutil.rmtree(os.path.join(data_dir, 'right'))
-  shutil.rmtree(os.path.join(data_dir, 'up'))
-  shutil.rmtree(os.path.join(data_dir, 'down'))
-  shutil.rmtree(os.path.join(data_dir, 'go'))
-  shutil.rmtree(os.path.join(data_dir, 'stop'))
+    tf.keras.utils.get_file(
+        'mini_speech_commands.zip',
+        origin="http://storage.googleapis.com/download.tensorflow.org/data/mini_speech_commands.zip",
+        extract=True,
+        cache_dir='.', cache_subdir='data')
+    # Delete the unwanted parts of the dataset
+    shutil.rmtree(os.path.join(data_dir, 'left'))
+    shutil.rmtree(os.path.join(data_dir, 'right'))
+    shutil.rmtree(os.path.join(data_dir, 'up'))
+    shutil.rmtree(os.path.join(data_dir, 'down'))
+    shutil.rmtree(os.path.join(data_dir, 'go'))
+    shutil.rmtree(os.path.join(data_dir, 'stop'))
 
+    for data in ['yes', 'no']:
+        curr_dir = os.path.join(data_dir, data)
+        all_files = [os.path.join(curr_dir, fn) for fn in os.listdir(curr_dir) if fn.endswith('.wav')]
 
-# The audio clips are 1 second or less at 16kHz.
-# The `output_sequence_length=16000` pads the short ones to exactly 1 second
-# (and would trim longer ones) so that they can be easily batched.
-train_ds, val_ds = tf.keras.utils.audio_dataset_from_directory(
-    directory=data_dir,
-    batch_size=64,
-    validation_split=0.2,
-    seed=0,
-    output_sequence_length=16000,
-    subset='both')
+        # Split into 60% train
+        train_files, val_files = train_test_split(all_files, test_size=0.4, random_state=0)
+
+        # Split the remaining 40% into 20% validation and 20% test
+        test_files, val_files = train_test_split(val_files, test_size=0.5, random_state=0)
+
+        print(f'Number of test files: {len(test_files)}')
+        print(f'Number of train files: {len(train_files)}')
+        print(f'Number of val files: {len(val_files)}')
+
+        if not os.path.exists(os.path.join(os.path.join(data_dir, 'train'), data)):
+            os.makedirs(os.path.join(os.path.join(os.path.join(data_dir, 'train'), data)))
+        if not os.path.exists(os.path.join(os.path.join(data_dir, 'test'), data)):
+            os.makedirs(os.path.join(os.path.join(os.path.join(data_dir, 'test'), data)))
+        if not os.path.exists(os.path.join(os.path.join(data_dir, 'val'), data)):
+            os.makedirs(os.path.join(os.path.join(os.path.join(data_dir, 'val'), data)))
+
+        for f in test_files:
+            os.rename(f, os.path.join(os.path.join(os.path.join(data_dir, 'test'), data), os.path.basename(f)))
+        for f in train_files:
+            os.rename(f, os.path.join(os.path.join(os.path.join(data_dir, 'train'), data), os.path.basename(f)))
+        for f in val_files:
+            os.rename(f, os.path.join(os.path.join(os.path.join(data_dir, 'val'), data), os.path.basename(f)))
+
+train_ds = tf.keras.utils.audio_dataset_from_directory(
+    directory=os.path.join(os.path.join(data_dir, 'train')),
+    output_sequence_length=16000)
+
+test_ds = tf.keras.utils.audio_dataset_from_directory(
+    directory=os.path.join(os.path.join(data_dir, 'test')),
+    output_sequence_length=16000)
+
+val_ds = tf.keras.utils.audio_dataset_from_directory(
+    directory=os.path.join(os.path.join(data_dir, 'val')),
+    output_sequence_length=16000)
 
 label_names = np.array(train_ds.class_names)
 print("label names:", label_names)
@@ -230,14 +259,7 @@ else:
 # ## Run inference on an audio file
 # Finally, verify the model's prediction output using an input audio file of someone saying "no". How well does your model perform?
 
-#x = data_dir/'no/01bb6a2a_nohash_0.wav'
-x = data_dir/'yes/5184ed3e_nohash_0.wav'
-#x = data_dir/'no/0cd323ec_nohash_1.wav'
-#x = data_dir/'no/2da58b32_nohash_4.wav'
-#x = data_dir/'yes/1a673010_nohash_0.wav'
-#x = data_dir/'yes/01bb6a2a_nohash_4.wav'
-#x = data_dir/'left/0e5193e6_nohash_0.wav'
-#x = data_dir/'up/0d2bcf9d_nohash_0.wav'
+x = data_dir/'test/yes/004ae714_nohash_0.wav'
 x = tf.io.read_file(str(x))
 x, sample_rate = tf.audio.decode_wav(x, desired_channels=1, desired_samples=16000,)
 x = tf.squeeze(x, axis=-1)

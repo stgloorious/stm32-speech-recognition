@@ -36,13 +36,13 @@ dataset and split it into train, test and validation sets.
 The model will only be trained if `model.keras` does not exist already,
 so delete that to force retraining.
 
-Once the model is trained, it is automatically copied to `src/models`,
-where it will be compiled into the firmware in the next
-step.
-
 ~~~
 python train.py
 ~~~
+
+Once the model is trained, it is automatically copied to `src/models`,
+where it will be compiled into the firmware in the next
+step.
 
 ## Build
 With the model being trained, you can proceed to build the code.

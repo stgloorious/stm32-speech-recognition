@@ -25,9 +25,9 @@ def get_spectrogram(waveform):
 yes = 0
 no = 0
 # TODO Change the directories to evaluate HERE
-for file in tqdm(os.listdir('../ml/data/mini_speech_commands/train/no')):
+for file in tqdm(os.listdir('../ml/data/mini_speech_commands/test/yes')):
     #x = '../ml/data/mini_speech_commands/yes/5184ed3e_nohash_0.wav'
-    x = tf.io.read_file(str(os.path.join('../ml/data/mini_speech_commands/train/no/', file)))
+    x = tf.io.read_file(str(os.path.join('../ml/data/mini_speech_commands/test/yes/', file)))
     x, sample_rate = tf.audio.decode_wav(x, desired_channels=1, desired_samples=16000,)
     x = tf.squeeze(x, axis=-1)
     waveform = x
@@ -120,8 +120,12 @@ for file in tqdm(os.listdir('../ml/data/mini_speech_commands/train/no')):
     speed = filesize / total_time / 1024.0
     #print(f'Transaction completed successfully ({speed:.2f} kiB/s, {naks} retransmissions)')
 
-    ser.timeout = 1
+    # The timeout should be larger than the time it takes for the inference
+    # on optimized and unoptimized tensorflow kernels
+    ser.timeout = 0.35
     last = False
+    dt = 0
+    prediction = '?'
     while True:
         c = ser.read().decode('utf-8')
         if (c == ''): #timeout
@@ -143,6 +147,6 @@ for file in tqdm(os.listdir('../ml/data/mini_speech_commands/train/no')):
 
     with open('log.csv', 'a') as f:
         # TODO change the percentage calculation HERE
-        f.write(f'{datetime.datetime.now().isoformat()},{file},{dt},{prediction},{yes},{no},{no/(yes+no):.02%}\n')
+        f.write(f'{datetime.datetime.now().isoformat()},{file},{dt},{prediction},{yes},{no},{yes/(yes+no):.02%}\n')
 
 ser.close()

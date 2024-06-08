@@ -45,7 +45,8 @@ where it will be compiled into the firmware in the next
 step.
 
 ## Build
-With the model being trained, you can proceed to build the code.
+With the model trained, you can proceed to build the code.
+
 ~~~
 cd stm32-speech-recognition
 cmake -B build && make -C build

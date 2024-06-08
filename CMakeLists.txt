@@ -4,6 +4,9 @@ project(stm32-speech-recognition C ASM CXX)
 # Bare-metal project
 set(CMAKE_SYSTEM_NAME Generic)
 
+# For CMSIS-NN
+include(ExternalProject)
+
 # Compiler settings
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
 set(CMAKE_CXX_COMPILER arm-none-eabi-c++)
@@ -125,6 +128,14 @@ add_custom_target(gentab32 COMMAND make -C
 add_library(crc32 STATIC ${CMAKE_SOURCE_DIR}/third_party/libcrc/src/crc32.c)
 add_dependencies(crc32 gentab32)
 
+# CMSIS-NN
+ExternalProject_Add(cmsis-nn
+	SOURCE_DIR ${CMAKE_SOURCE_DIR}/third_party/CMSIS-NN
+	INSTALL_COMMAND ""
+)
+add_library(cmsisnn SHARED IMPORTED)
+set_target_properties(cmsisnn PROPERTIES IMPORTED_LOCATION
+	${CMAKE_BINARY_DIR}/cmsis-nn-prefix/src/cmsis-nn-build/libcmsis-nn.a)
 # Project sources
 FILE(GLOB demo_srcs src/*.c
 	src/*.cc
@@ -134,7 +145,7 @@ FILE(GLOB demo_srcs src/*.c
 )
 
 add_executable(demo.elf ${demo_srcs})
-target_link_libraries(demo.elf hal tflm crc32)
+target_link_libraries(demo.elf hal tflm crc32 cmsisnn)
 
 # st-util wants a binary-only format, not an ELF
 add_custom_target(bin ALL DEPENDS demo.elf

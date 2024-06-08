@@ -17,6 +17,8 @@ limitations under the License.
 #include <string.h>
 #include <unistd.h>
 
+#include <stm32l4xx_hal.h>
+
 #include <models/model_tflite.h>
 #include <tensorflow/lite/core/c/common.h>
 #include <tensorflow/lite/micro/micro_interpreter.h>
@@ -173,6 +175,7 @@ int main(int argc, char *argv[])
 		size_t input_tensor_len = serial_recv(input_tensor, sizeof(input_tensor));
 		DEBUG_PRINTF("Received %u bytes.\n", input_tensor_len);
 
+		size_t start_time = HAL_GetTick();
 		// Prepare input tensor
 		TfLiteTensor *input = interpreter.input(0);
 		input->dims->size = 4;
@@ -196,12 +199,17 @@ int main(int argc, char *argv[])
 		TfLiteTensor *output = interpreter.output(0);
 		const char output_name[] = "Output";
 		output->name = output_name;
+		size_t end_time = HAL_GetTick();
+
+		DEBUG_PRINTF("Time: #%08u\n", end_time - start_time);
 
 		print_shape(output);
 		const char* labels[] = {"NO", "YES"};
-		for (int i = 0; i < output->dims->data[output->dims->size - 1]; i++) {
-			SUCCESS_PRINTF("Prediction %4s: %6.2f %%\n", labels[i],
-					   tflite::GetTensorData<uint8_t>(output)[i]/2.55);
+		if (tflite::GetTensorData<uint8_t>(output)[0] > tflite::GetTensorData<uint8_t>(output)[1]){
+			SUCCESS_PRINTF("Prediction: @%s\n", labels[0])
+		}
+		else {
+			SUCCESS_PRINTF("Prediction: @%s\n", labels[1])
 		}
 	}
 }

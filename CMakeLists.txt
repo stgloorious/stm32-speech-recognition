@@ -94,7 +94,7 @@ add_library(hal STATIC ${hal_srcs})
 set(LIBCMSISNN_PATH ${CMAKE_BINARY_DIR}/cmsis-nn-prefix/src/cmsis-nn-build/libcmsis-nn.a)
 set(LIBCMSISNN_CXXFLAGS "-mthumb -mcpu=${CMAKE_SYSTEM_PROCESSOR} \
 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -nostdlib -s \
--ffunction-sections -s -Wl,gc-sections")
+-ffunction-sections -fdata-sections")
 
 ExternalProject_Add(cmsis-nn
 	SOURCE_DIR ${CMAKE_SOURCE_DIR}/third_party/CMSIS-NN
@@ -104,7 +104,6 @@ ExternalProject_Add(cmsis-nn
 	-DCMAKE_C_FLAGS=${LIBCMSISNN_CXXFLAGS}
 	-DCMAKE_STATIC_LINKER_FLAGS=
 	-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-	-DCMAKE_ASM_COMPILER=${CMAKE_ASM_COMPILER}
 	-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
 )
 add_library(cmsisnn SHARED IMPORTED)
@@ -116,7 +115,7 @@ set(LIBCMSISDSP_PATH
 set(LIBCMSISDSP_CXXFLAGS "-mthumb -mcpu=${CMAKE_SYSTEM_PROCESSOR} \
 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -nostdlib \
 -iquote ${CMAKE_SOURCE_DIR}/third_party/CMSIS_5/CMSIS/Core/Include \
--ffunction-sections -fdata-sections -s \
+-ffunction-sections -fdata-sections\
 ")
 
 ExternalProject_Add(cmsis-dsp

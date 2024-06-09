@@ -30,6 +30,11 @@ limitations under the License.
 #include <tensorflow/lite/micro/system_setup.h>
 #include <tensorflow/lite/schema/schema_generated.h>
 
+#include <dsp/transform_functions.h>
+#include <dsp/window_functions.h>
+#include <dsp/fast_math_functions.h>
+#include <math.h>
+
 #include <serial.h>
 
 #include "mic.h"
@@ -125,6 +130,15 @@ int main(int argc, char *argv[])
 		;
 	microphone.dump_recording();
 */
+
+	arm_rfft_instance_q15 fft;
+	if (arm_rfft_init_256_q15(&fft, 0, 0) != ARM_MATH_SUCCESS){
+		assert(!"Failed to perform RFFT");
+	}
+
+	float* hanning = NULL;
+	uint32_t window_size = 255;
+	arm_hanning_f32(hanning, window_size);
 
 	const tflite::Model *model = tflite::GetModel(model_tflite);
 	DEBUG_PRINTF("Model architecture:\n");

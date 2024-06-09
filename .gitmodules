@@ -10,3 +10,9 @@
 [submodule "third_party/CMSIS-NN"]
 	path = third_party/CMSIS-NN
 	url = https://github.com/ARM-software/CMSIS-NN.git
+[submodule "third_party/CMSIS-DSP"]
+	path = third_party/CMSIS-DSP
+	url = https://github.com/ARM-software/CMSIS-DSP.git
+[submodule "third_party/CMSIS_5"]
+	path = third_party/CMSIS_5
+	url = https://github.com/ARM-software/CMSIS_5.git

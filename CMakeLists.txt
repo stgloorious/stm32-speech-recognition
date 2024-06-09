@@ -77,6 +77,8 @@ include_directories(${CMAKE_SOURCE_DIR}/third_party/libcrc/include)
 
 # CMSIS includes
 include_directories(${CMAKE_SOURCE_DIR}/third_party/CMSIS_NN)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/CMSIS-DSP/Include)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/CMSIS_5/CMSIS/Core/Include)
 
 # Link
 FILE(GLOB linker_script ld/*.ld)
@@ -90,7 +92,9 @@ add_library(hal STATIC ${hal_srcs})
 
 # CMSIS-NN
 set(LIBCMSISNN_PATH ${CMAKE_BINARY_DIR}/cmsis-nn-prefix/src/cmsis-nn-build/libcmsis-nn.a)
-set(LIBCMSISNN_CXXFLAGS "-mthumb -mcpu=${CMAKE_SYSTEM_PROCESSOR} -mfpu=fpv4-sp-d16 -mfloat-abi=hard -nostdlib")
+set(LIBCMSISNN_CXXFLAGS "-mthumb -mcpu=${CMAKE_SYSTEM_PROCESSOR} \
+-mfpu=fpv4-sp-d16 -mfloat-abi=hard -nostdlib -s \
+-ffunction-sections -s -Wl,gc-sections")
 
 ExternalProject_Add(cmsis-nn
 	SOURCE_DIR ${CMAKE_SOURCE_DIR}/third_party/CMSIS-NN
@@ -105,6 +109,30 @@ ExternalProject_Add(cmsis-nn
 )
 add_library(cmsisnn SHARED IMPORTED)
 set_target_properties(cmsisnn PROPERTIES IMPORTED_LOCATION ${LIBCMSISNN_PATH})
+
+# CMSIS-DSP
+set(LIBCMSISDSP_PATH
+	${CMAKE_BINARY_DIR}/cmsis-dsp-prefix/src/cmsis-dsp-build/libCMSISDSP.a)
+set(LIBCMSISDSP_CXXFLAGS "-mthumb -mcpu=${CMAKE_SYSTEM_PROCESSOR} \
+-mfpu=fpv4-sp-d16 -mfloat-abi=hard -nostdlib \
+-iquote ${CMAKE_SOURCE_DIR}/third_party/CMSIS_5/CMSIS/Core/Include \
+-ffunction-sections -fdata-sections -s \
+")
+
+ExternalProject_Add(cmsis-dsp
+	SOURCE_DIR ${CMAKE_SOURCE_DIR}/third_party/CMSIS-DSP/Source
+	PATCH_COMMAND git restore . && git apply ${CMAKE_SOURCE_DIR}/third_party/patches/cmsis-dsp-remove-tables.patch
+	INSTALL_COMMAND ""
+	CMAKE_ARGS
+	-DCMAKE_CXX_FLAGS=${LIBCMSISDSP_CXXFLAGS}
+	-DCMAKE_C_FLAGS=${LIBCMSISDSP_CXXFLAGS}
+	-DCMAKE_STATIC_LINKER_FLAGS=
+	-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+	-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+)
+add_library(cmsisdsp SHARED IMPORTED)
+set_target_properties(cmsisdsp PROPERTIES IMPORTED_LOCATION ${LIBCMSISDSP_PATH})
+add_dependencies(cmsisdsp cmsis-dsp)
 
 # Project sources
 FILE(GLOB demo_srcs src/*.c
@@ -162,7 +190,7 @@ add_library(crc32 STATIC ${CMAKE_SOURCE_DIR}/third_party/libcrc/src/crc32.c)
 add_dependencies(crc32 gentab32)
 
 add_executable(demo.elf ${demo_srcs})
-target_link_libraries(demo.elf hal tflm crc32 cmsisnn)
+target_link_libraries(demo.elf hal tflm crc32 cmsisnn cmsisdsp)
 
 # st-util wants a binary-only format, not an ELF
 add_custom_target(bin ALL DEPENDS demo.elf

@@ -13,6 +13,7 @@ def wav_to_uint8(input_wav_path, output_bin_path):
         data = data.mean(axis=1)
 
     # Normalize the data to be between 0 and 1
+    data = data.astype(np.int64)
     data = (data - np.min(data)) / (np.max(data) - np.min(data))
 
     # Scale to uint8

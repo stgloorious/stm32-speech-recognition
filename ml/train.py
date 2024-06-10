@@ -36,6 +36,8 @@ np.random.seed(seed)
 
 DATASET_PATH = 'data/mini_speech_commands'
 
+keywords = ['yes', 'no', 'left', 'right', 'up', 'down']
+
 data_dir = pathlib.Path(DATASET_PATH)
 if not data_dir.exists():
     tf.keras.utils.get_file(
@@ -44,14 +46,14 @@ if not data_dir.exists():
         extract=True,
         cache_dir='.', cache_subdir='data')
     # Delete the unwanted parts of the dataset
-    shutil.rmtree(os.path.join(data_dir, 'left'))
-    shutil.rmtree(os.path.join(data_dir, 'right'))
-    shutil.rmtree(os.path.join(data_dir, 'up'))
-    shutil.rmtree(os.path.join(data_dir, 'down'))
+    #shutil.rmtree(os.path.join(data_dir, 'left'))
+    #shutil.rmtree(os.path.join(data_dir, 'right'))
+    #shutil.rmtree(os.path.join(data_dir, 'up'))
+    #shutil.rmtree(os.path.join(data_dir, 'down'))
     shutil.rmtree(os.path.join(data_dir, 'go'))
     shutil.rmtree(os.path.join(data_dir, 'stop'))
 
-    for data in ['yes', 'no']:
+    for data in keywords:
         curr_dir = os.path.join(data_dir, data)
         all_files = [os.path.join(curr_dir, fn) for fn in os.listdir(curr_dir) if fn.endswith('.wav')]
 
@@ -168,11 +170,12 @@ if not os.path.exists('model.keras'):
         layers.Resizing(32, 32),
         # Normalize.
         norm_layer,
+        layers.Conv2D(32, 3, activation='relu'),
         layers.Conv2D(16, 3, activation='relu'),
         layers.MaxPooling2D(),
         layers.Dropout(0.25),
         layers.Flatten(),
-        layers.Dense(8, activation='relu'),
+        layers.Dense(24, activation='relu'),
         layers.Dropout(0.5),
         layers.Dense(num_labels),
     ])
@@ -258,8 +261,8 @@ else:
 
 # ## Run inference on an audio file
 
-testfile = os.listdir(data_dir/'test/yes/')[0]
-x = tf.io.read_file(str(os.path.join(data_dir/'test/yes/', testfile)))
+testfile = os.listdir(data_dir/'test/no/')[0]
+x = tf.io.read_file(str(os.path.join(data_dir/'test/no/', testfile)))
 x, sample_rate = tf.audio.decode_wav(x, desired_channels=1, desired_samples=16000,)
 x = tf.squeeze(x, axis=-1)
 waveform = x
@@ -269,7 +272,7 @@ x = x[tf.newaxis,...]
 prediction = model(x)
 values = tf.nn.softmax(prediction[0])
 print('Prediction of float model:')
-label_names = ['no', 'yes']
+label_names = keywords
 for i in range(len(label_names)):
     print(f'{label_names[i]}: {values[i]:.2%}')
 
@@ -283,8 +286,12 @@ interpreter = tf.lite.Interpreter(model_content=tflite_model)
 interpreter.allocate_tensors()
 
 # Input data
-input_data = np.array(x)
-preprocessed_input_data = (input_data * 256).astype('uint8')
+spec = np.array(x)
+# Multiplying by 256 is not a proper quantization, we should normalize
+# first. However, due to memory and performance contraints this is difficult
+# to reproduce on the microcontroller, and just multiplying by 256 seem to
+# work well enough
+preprocessed_input_data = (spec * 256).astype('uint8')
 
 with open('sample_input.bin', 'wb') as f:
     f.write(preprocessed_input_data)

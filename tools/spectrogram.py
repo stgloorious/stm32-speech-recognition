@@ -11,7 +11,7 @@ window_size = 256
 frame_step = 128
 samplingrate = 16000
 
-norm = mcolors.Normalize(-10, 2)
+norm = mcolors.Normalize(-5, 6)
 
 # Apply STFT to waveforms to get spectrogram
 def get_spectrogram(waveform):
@@ -85,7 +85,7 @@ spectrogram_stft = get_spectrogram(waveform)
 spectrogram_cmsis = spectrogram_stft
 
 # Using tensorflow built-in
-fig, ax = plt.subplots(1, 3, figsize=(10,8))
+fig, ax = plt.subplots(1, 5, figsize=(10,8))
 ax[0].set_title('tf.signal.stft')
 ax[0].set_xlabel('Samples (Time)')
 ax[0].set_ylabel('Frequency [kHz]')
@@ -97,25 +97,47 @@ ax[1].set_xlabel('Samples (Time)')
 spectrogram_numpy = get_numpy_spec(waveform)
 mesh = plot_numpy_spec(spectrogram_numpy, ax[1])
 
-## On the microcontroller
-ax[2].set_title('CMSIS-DSP (on STM32)')
+# Using numpy as manual window
+ax[2].set_title('numpy.fft.fft (uint8)')
 ax[2].set_xlabel('Samples (Time)')
+
+spec = get_numpy_spec(waveform)
+normalized_spec = (spec - np.min(spec))/(np.max(spec) - np.min(spec)) * 256
+spectrogram_numpy = (normalized_spec).astype('uint8')
+plot_numpy_spec(spectrogram_numpy, ax[2])
+
+## On the microcontroller
+ax[3].set_title('CMSIS-DSP (on STM32)')
+ax[3].set_xlabel('Samples (Time)')
 
 data = []
 with open('data.txt', 'r') as f:
     for line in f:
         data.append(float(line.strip()))
 
+floatdata = data[:15996]
+intdata = data[15996:]
+
 spectrogram_cmsis = []
 for i in range(124):
     # The result of an N-point FFT is (N+1) points
-    data_window = data[i * (frame_step + 1): i * (frame_step + 1) + window_size]
+    data_window = floatdata[i * (frame_step + 1): i * (frame_step + 1) + window_size]
     spectrogram_cmsis.append(np.array(data_window[:frame_step+1]))
 spectrogram_cmsis = np.array(spectrogram_cmsis)
+mesh = plot_numpy_spec(spectrogram_cmsis, ax[3])
 
-mesh = plot_numpy_spec(spectrogram_cmsis, ax[2])
+ax[4].set_title('CMSIS-DSP (on STM32, uint8)')
+ax[4].set_xlabel('Samples (Time)')
 
-fig.suptitle('Spectrograms Of Spoken \"Yes\" Keyword Calculated By Different Methods and Platforms')
+spectrogram_cmsis = []
+for i in range(124):
+    # The result of an N-point FFT is (N+1) points
+    data_window = intdata[i * (frame_step + 1): i * (frame_step + 1) + window_size]
+    spectrogram_cmsis.append(np.array(data_window[:frame_step+1]))
+spectrogram_cmsis = np.array(spectrogram_cmsis)
+mesh = plot_numpy_spec(spectrogram_cmsis, ax[4])
+
+fig.suptitle('Spectrograms Of Spoken \"No\" Keyword Calculated By Different Methods and Platforms')
 cbar = fig.colorbar(mesh, ax=ax.ravel().tolist(), orientation='horizontal', pad=0.1, shrink=0.3)
 cbar.set_label('Magnitude')
 plt.show()

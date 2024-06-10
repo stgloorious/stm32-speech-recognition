@@ -45,11 +45,11 @@ void dfsdm_init(void)
 {
 	hdfsdm1_filter0.Instance = DFSDM1_Filter0;
 	hdfsdm1_filter0.Init.RegularParam.Trigger = DFSDM_FILTER_SW_TRIGGER;
-	hdfsdm1_filter0.Init.RegularParam.FastMode = ENABLE;
+	hdfsdm1_filter0.Init.RegularParam.FastMode = DISABLE;
 	hdfsdm1_filter0.Init.RegularParam.DmaMode = ENABLE;
-	hdfsdm1_filter0.Init.FilterParam.SincOrder = DFSDM_FILTER_SINC3_ORDER;
-	hdfsdm1_filter0.Init.FilterParam.Oversampling = 200;
-	hdfsdm1_filter0.Init.FilterParam.IntOversampling = 1;
+	hdfsdm1_filter0.Init.FilterParam.SincOrder = DFSDM_FILTER_SINC2_ORDER;
+	hdfsdm1_filter0.Init.FilterParam.Oversampling = 25;
+	hdfsdm1_filter0.Init.FilterParam.IntOversampling = 4;
 	if (HAL_DFSDM_FilterInit(&hdfsdm1_filter0) != HAL_OK) {
 		ERR("Failed to initialize DFSDM filter 0\n");
 	}
@@ -67,8 +67,8 @@ void dfsdm_init(void)
 		DFSDM_CHANNEL_SPI_CLOCK_INTERNAL;
 	hdfsdm1_channel2.Init.Awd.FilterOrder = DFSDM_CHANNEL_FASTSINC_ORDER;
 	hdfsdm1_channel2.Init.Awd.Oversampling = 1;
-	hdfsdm1_channel2.Init.Offset = -190;
-	hdfsdm1_channel2.Init.RightBitShift = 8;
+	hdfsdm1_channel2.Init.Offset = 0;
+	hdfsdm1_channel2.Init.RightBitShift = 2;
 	if (HAL_DFSDM_ChannelInit(&hdfsdm1_channel2) != HAL_OK) {
 		ERR("Failed to initialize DFSDM channel 2\n");
 	}

@@ -9,3 +9,7 @@ ml/sample_input.*
 ml/data
 ml/venv
 src/models
+__pycache__
+venv
+tools/*.wav
+tools/*.log

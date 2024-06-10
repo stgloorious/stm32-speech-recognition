@@ -30,20 +30,20 @@ limitations under the License.
 #include <tensorflow/lite/micro/system_setup.h>
 #include <tensorflow/lite/schema/schema_generated.h>
 
+#include <dsp/basic_math_functions.h>
 #include <dsp/transform_functions.h>
 #include <dsp/window_functions.h>
 #include <dsp/fast_math_functions.h>
-#include <math.h>
 
 #include <serial.h>
 
 #include "mic.h"
 int dfsdm_conversion_done;
 
-const int kTensorArenaSize = 48 * 1024;
+const int kTensorArenaSize = 39 * 1024;
 alignas(16) static uint8_t tensor_arena[kTensorArenaSize] = { 0x55 };
 
-static char input_tensor[16500];
+static char waveform[16500];
 
 #define DEBUG_PRINTF(...)            \
 	{                            \
@@ -131,14 +131,97 @@ int main(int argc, char *argv[])
 	microphone.dump_recording();
 */
 
-	arm_rfft_instance_q15 fft;
-	if (arm_rfft_init_256_q15(&fft, 0, 0) != ARM_MATH_SUCCESS){
-		assert(!"Failed to perform RFFT");
+	uint32_t waveform_len = serial_recv(waveform, sizeof(waveform));
+	if (waveform_len == 0){
+		assert(!"Transfer failed.");
 	}
 
-	float* hanning = NULL;
-	uint32_t window_size = 255;
+	const static uint32_t window_size = 256;
+	const static uint32_t frame_step = 128;
+
+	arm_rfft_fast_instance_f32 fft;
+	if (arm_rfft_fast_init_256_f32(&fft) != ARM_MATH_SUCCESS){
+		assert(!"Failed to init RFFT");
+	}
+
+	float min = 999999.0f;
+	float max = 0;
+	for (uint32_t i = 0; i < waveform_len; i++){
+		float val = (float)((uint8_t)waveform[i]);
+		if (val < min){
+			min = val;
+		}
+		if (val > max){
+			max = val;
+		}
+	}
+
+
+	float hanning[window_size];
 	arm_hanning_f32(hanning, window_size);
+
+	for (uint32_t idx = 0; idx < waveform_len/frame_step; idx++){
+		float src[window_size];
+		float dst[window_size];
+		float mag[window_size+1];
+		double sum = 0;
+
+		for (uint32_t i = 0; i < window_size; i++){
+			src[i] = (float)((uint8_t)waveform[idx * frame_step + i]);
+
+			// Apply window
+			src[i] *= hanning[i];
+
+			// -1...1
+			src[i] = (2.0f * (src[i] - min) / (max - min)) - 1;
+
+			// Calculate mean
+			sum += src[i];
+		}
+
+		// Remove DC component
+		float mean = (float)(sum/(double)window_size);
+		for (uint32_t i = 0; i < window_size; i++){
+			src[i] = src[i] - mean;
+		}
+
+		arm_rfft_fast_f32(&fft, src, dst, 0);
+
+		// From to the CMSIS documentation:
+		// https://arm-software.github.io/CMSIS-DSP/latest/group__RealFFT.html
+		//
+		// The FFT of a real N-point sequence has even symmetry in the
+		// frequency domain. The second half of the data equals the conjugate
+		// of the first half flipped in frequency. This conjugate part is not
+		// computed by the float RFFT. As consequence, the output of a N point
+		// real FFT should be a N//2 + 1 complex numbers so N + 2 floats.
+
+		// It happens that the first complex of number of the RFFT output is
+		// actually all real. Its real part represents the DC offset. The value
+		// at Nyquist frequency is also real.
+
+		// Those two complex numbers can be encoded with 2 floats rather than
+		// using two numbers with an imaginary part set to zero.
+
+		// The implementation is using a trick so that the output buffer can be
+		// N float : the last real is packaged in the imaginary part of the
+		// first complex (since this imaginary part is not used and is zero).
+
+		// The first "complex" is actually to reals, X[0] and X[N/2]
+		float first_real = (dst[0] < 0.0f) ? (-1.0f * dst[0]) : dst[0];
+		float second_real = (dst[1] < 0.0f) ? (-1.0f * dst[1]) : dst[1];
+
+		// Take the magnitude for all the complex values in between
+		arm_cmplx_mag_f32(dst + 2, mag + 1, window_size/2);
+
+		// Fill in the two real numbers at 0 and N/2
+		mag[0] = first_real;
+		mag[128] = second_real;
+
+		for (uint32_t i = 0; i < window_size/2 + 1; i++){
+			printf("%.06f\n", mag[i]);
+		}
+	}
 
 	const tflite::Model *model = tflite::GetModel(model_tflite);
 	DEBUG_PRINTF("Model architecture:\n");
@@ -186,6 +269,7 @@ int main(int argc, char *argv[])
 	DEBUG_PRINTF("MicroInterpreter tensors allocated.\n");
 
 	while (1){
+		/*
 		size_t input_tensor_len = serial_recv(input_tensor, sizeof(input_tensor));
 		DEBUG_PRINTF("Received %u bytes.\n", input_tensor_len);
 
@@ -225,5 +309,6 @@ int main(int argc, char *argv[])
 		else {
 			SUCCESS_PRINTF("Prediction: @%s\n", labels[1])
 		}
+		*/
 	}
 }

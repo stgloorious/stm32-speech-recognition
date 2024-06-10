@@ -115,7 +115,8 @@ set(LIBCMSISDSP_PATH
 set(LIBCMSISDSP_CXXFLAGS "-mthumb -mcpu=${CMAKE_SYSTEM_PROCESSOR} \
 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -nostdlib \
 -iquote ${CMAKE_SOURCE_DIR}/third_party/CMSIS_5/CMSIS/Core/Include \
--ffunction-sections -fdata-sections\
+-ffunction-sections -fdata-sections \
+-DF32 -DFFT256 -DCFFT128 -DTC128\
 ")
 
 ExternalProject_Add(cmsis-dsp
@@ -128,6 +129,8 @@ ExternalProject_Add(cmsis-dsp
 	-DCMAKE_STATIC_LINKER_FLAGS=
 	-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
 	-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+	-DDISABLEFLOAT16=1
+	-DF32=1
 )
 add_library(cmsisdsp SHARED IMPORTED)
 set_target_properties(cmsisdsp PROPERTIES IMPORTED_LOCATION ${LIBCMSISDSP_PATH})

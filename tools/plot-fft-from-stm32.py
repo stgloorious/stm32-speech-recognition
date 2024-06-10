@@ -9,7 +9,8 @@ with open('data.txt', 'r') as f:
     for line in f:
         X.append(float(line.strip()))
 
-X = X[10*128:11*128]
+# Get the first FFT (N+1 points)
+X = X[129 * 20 : 129 * 20 + 129]
 samplingrate = 16000
 N = len(X)*2
 n = np.arange(N)
@@ -19,7 +20,7 @@ freq = n / T
 # Plot the FFT results with frequency in hertz
 plt.figure(figsize=(10, 6))
 plt.plot(freq[:N//2], X)  # Plot only the positive frequencies
-plt.title('FFT of 440 Hz Test Signal Calculated By STM32')
+plt.title('FFT of Test Signal Calculated By STM32')
 plt.xlabel('Frequency (Hz)')
 plt.ylabel('Magnitude')
 plt.grid(True)

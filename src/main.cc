@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 */
 
 	uint32_t waveform_len = serial_recv(waveform, sizeof(waveform));
-	if (waveform_len == 0){
+	if (waveform_len == 0) {
 		assert(!"Transfer failed.");
 	}
 
@@ -140,52 +140,51 @@ int main(int argc, char *argv[])
 	const static uint32_t frame_step = 128;
 
 	arm_rfft_fast_instance_f32 fft;
-	if (arm_rfft_fast_init_256_f32(&fft) != ARM_MATH_SUCCESS){
+	if (arm_rfft_fast_init_256_f32(&fft) != ARM_MATH_SUCCESS) {
 		assert(!"Failed to init RFFT");
 	}
 
 	float min = 999999.0f;
 	float max = 0;
-	for (uint32_t i = 0; i < waveform_len; i++){
+	for (uint32_t i = 0; i < waveform_len; i++) {
 		float val = (float)((uint8_t)waveform[i]);
-		if (val < min){
+		if (val < min) {
 			min = val;
 		}
-		if (val > max){
+		if (val > max) {
 			max = val;
 		}
 	}
 
-
 	float hanning[window_size];
 	arm_hanning_f32(hanning, window_size);
 
-	for (uint32_t idx = 0; idx < waveform_len/frame_step; idx++){
-		float src[window_size];
-		float dst[window_size];
-		float mag[window_size+1];
+	for (uint32_t idx = 0; idx < 124; idx++) {
+		static float dst[window_size];
+		static float mag[window_size + 1];
 		double sum = 0;
 
-		for (uint32_t i = 0; i < window_size; i++){
-			src[i] = (float)((uint8_t)waveform[idx * frame_step + i]);
+		static float signal_chunk[window_size];
 
-			// Apply window
-			src[i] *= hanning[i];
+		for (uint32_t i = 0; i < window_size; i++) {
+			signal_chunk[i] =
+				(float)((uint8_t)waveform[idx * frame_step + i]);
 
-			// -1...1
-			src[i] = (2.0f * (src[i] - min) / (max - min)) - 1;
-
-			// Calculate mean
-			sum += src[i];
+			// Normalize from -1 to 1
+			signal_chunk[i] = (2.0f * (signal_chunk[i] - min) / (max - min)) - 1;
+			sum += signal_chunk[i];
 		}
 
 		// Remove DC component
-		float mean = (float)(sum/(double)window_size);
-		for (uint32_t i = 0; i < window_size; i++){
-			src[i] = src[i] - mean;
+		float mean = (float)(sum / (double)window_size);
+		for (uint32_t i = 0; i < window_size; i++) {
+			signal_chunk[i] = signal_chunk[i] - mean;
+
+			// Apply window function
+			signal_chunk[i] *= hanning[i];
 		}
 
-		arm_rfft_fast_f32(&fft, src, dst, 0);
+		arm_rfft_fast_f32(&fft, signal_chunk, dst, 0);
 
 		// From to the CMSIS documentation:
 		// https://arm-software.github.io/CMSIS-DSP/latest/group__RealFFT.html
@@ -212,13 +211,14 @@ int main(int argc, char *argv[])
 		float second_real = (dst[1] < 0.0f) ? (-1.0f * dst[1]) : dst[1];
 
 		// Take the magnitude for all the complex values in between
-		arm_cmplx_mag_f32(dst + 2, mag + 1, window_size/2);
+		arm_cmplx_mag_f32(dst + 2, mag + 1, window_size / 2);
 
 		// Fill in the two real numbers at 0 and N/2
 		mag[0] = first_real;
 		mag[128] = second_real;
 
-		for (uint32_t i = 0; i < window_size/2 + 1; i++){
+		// Send N+1 FFT output
+		for (uint32_t i = 0; i < 129; i++) {
 			printf("%.06f\n", mag[i]);
 		}
 	}
@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
 	}
 	DEBUG_PRINTF("MicroInterpreter tensors allocated.\n");
 
-	while (1){
+	while (1) {
 		/*
 		size_t input_tensor_len = serial_recv(input_tensor, sizeof(input_tensor));
 		DEBUG_PRINTF("Received %u bytes.\n", input_tensor_len);

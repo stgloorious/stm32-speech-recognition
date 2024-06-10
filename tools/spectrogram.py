@@ -11,7 +11,7 @@ window_size = 256
 frame_step = 128
 samplingrate = 16000
 
-norm = mcolors.Normalize(-10, 1.5)
+norm = mcolors.Normalize(-10, 2)
 
 # Apply STFT to waveforms to get spectrogram
 def get_spectrogram(waveform):
@@ -49,7 +49,8 @@ def get_numpy_spec(waveform):
     spectrogram_numpy = []
     for idx in range(math.ceil(len(waveform)/frame_step) - 1):
         signal_chunk = waveform[idx * frame_step : idx * frame_step + window_size]
-        signal_chunk = signal_chunk * np.hanning(window_size);
+        signal_chunk = signal_chunk - np.mean(signal_chunk)
+        signal_chunk = signal_chunk * np.hanning(window_size)
         X = np.abs(np.fft.fft(signal_chunk))
         spectrogram_numpy.append(np.array(X[:frame_step+1]))
 
@@ -107,6 +108,7 @@ with open('data.txt', 'r') as f:
 
 spectrogram_cmsis = []
 for i in range(124):
+    # The result of an N-point FFT is (N+1) points
     data_window = data[i * (frame_step + 1): i * (frame_step + 1) + window_size]
     spectrogram_cmsis.append(np.array(data_window[:frame_step+1]))
 spectrogram_cmsis = np.array(spectrogram_cmsis)

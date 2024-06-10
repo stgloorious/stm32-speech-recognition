@@ -194,6 +194,10 @@ add_dependencies(crc32 gentab32)
 add_executable(demo.elf ${demo_srcs})
 target_link_libraries(demo.elf hal tflm crc32 cmsisnn cmsisdsp)
 
+if(DEFINED PRINT_SPECTROGRAM)
+	target_compile_definitions(demo.elf PUBLIC PRINT_SPECTROGRAM)
+endif()
+
 # st-util wants a binary-only format, not an ELF
 add_custom_target(bin ALL DEPENDS demo.elf
 	COMMAND ${OBJCOPY} -O binary demo.elf demo.bin

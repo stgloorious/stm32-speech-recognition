@@ -137,7 +137,7 @@ for i in range(124):
 spectrogram_cmsis = np.array(spectrogram_cmsis)
 mesh = plot_numpy_spec(spectrogram_cmsis, ax[4])
 
-fig.suptitle('Spectrograms Of Spoken \"No\" Keyword Calculated By Different Methods and Platforms')
+fig.suptitle('Spectrograms Of Spoken Keyword Calculated By Different Methods and Platforms')
 cbar = fig.colorbar(mesh, ax=ax.ravel().tolist(), orientation='horizontal', pad=0.1, shrink=0.3)
 cbar.set_label('Magnitude')
 plt.show()

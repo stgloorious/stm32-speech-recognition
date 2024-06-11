@@ -1,8 +1,6 @@
 # Speech Recognition on STM32 using Machine Learning
 ![build status](https://github.com/stgloorious/stm32-speech-recognition/actions/workflows/cmake-single-platform.yml/badge.svg)
 
-[ML on MCU](https://www.vvz.ethz.ch/Vorlesungsverzeichnis/lerneinheit.view?semkez=2024S&ansicht=KATALOGDATEN&lerneinheitId=176625&lang=en) Demo Project
-
 This uses the [TensorFlow Lite for Microcontrollers](https://github.com/tensorflow/tflite-micro/)
 framework to perform simple keyword recognition on an STM32L475VGT
 B-L745E-IOT01A2 development board.
@@ -11,6 +9,8 @@ trained on the [speech_commands](https://huggingface.co/datasets/google/speech_c
 dataset by P. Warden.
 
 ![title picture](docs/assets/title.png)
+
+[ML on MCU](https://www.vvz.ethz.ch/Vorlesungsverzeichnis/lerneinheit.view?semkez=2024S&ansicht=KATALOGDATEN&lerneinheitId=176625&lang=en) Demo Project
 
 :warning: Make sure you clone the repository with `--recursive`, as it contains submodules.
 

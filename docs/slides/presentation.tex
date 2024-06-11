@@ -54,12 +54,13 @@
 	\begin{itemize}
 		\item<2->Project goals
 		\item<3->Hardware
-		\item<4->Dataset
-		\item<5->Model and framework
-		\item<6->Microcontroller Implementation
-		\item<7->Performance evaluation
-		\item<8->Limitations
-		\item<9->Demo
+		\item<4->Framework
+		\item<5->Dataset
+		\item<6->Model
+		\item<7->Microcontroller implementation
+		\item<8->Performance evaluation
+		\item<9->Limitations
+		\item<10->Demo
 	\end{itemize}
 \end{frame}
 
@@ -136,6 +137,26 @@
 	\end{minipage}
 \end{frame}
 
+\section{Framework}
+\subsection{Framework}
+\begin{frame}{Framework}
+
+TensorFlow Lite for Microcontrollers
+\begin{minipage}{0.5\textwidth}
+	\setbeamercolor{local structure}{fg=mygreen}
+	\setbeamercovered{transparent}
+	\begin{itemize}
+		\item<2->Easy to use
+		\item<3->Fully customizable
+		\item<4->Platform-independent
+	\end{itemize}
+	\end{minipage}
+	\begin{minipage}{0.48\textwidth}
+		\includegraphics[width=0.9\textwidth]{figures/tensorflow.png}
+	\end{minipage}
+
+\end{frame}
+
 \section{Dataset}
 \begin{frame}{Dataset}
 	speech\_commands\footnote{\url{https://huggingface.co/datasets/google/speech_commands}} by P. Warden at Google.\vspace{10mm}
@@ -157,26 +178,7 @@
 
 \end{frame}
 
-\section{Model and Framework}
-\subsection{Framework}
-\begin{frame}{Framework}
-
-TensorFlow Lite for Microcontrollers
-\begin{minipage}{0.5\textwidth}
-	\setbeamercolor{local structure}{fg=mygreen}
-	\setbeamercovered{transparent}
-	\begin{itemize}
-		\item<2->Easy to use
-		\item<3->Fully customizable
-		\item<4->Platform-independent
-	\end{itemize}
-	\end{minipage}
-	\begin{minipage}{0.48\textwidth}
-		\includegraphics[width=0.9\textwidth]{figures/tensorflow.png}
-	\end{minipage}
-
-\end{frame}
-
+\section{Model}
 \subsection{Preprocessing}
 \begin{frame}{Preprocessing}
 	Short-time fourier transform:\\[2mm]
@@ -186,7 +188,7 @@ $\mathbf{STFT}\{x[n]\}(m,\omega)\equiv X(m,\omega) =
 	\includegraphics[width=\textwidth]{figures/stft.png}
 \end{frame}
 
-\subsection{Model}
+\subsection{Model Architecture}
 \begin{frame}{Model}
 	\begin{tikzpicture}
 		\node[inner sep=0pt] at (0,0)(input){\includegraphics[width=10mm]

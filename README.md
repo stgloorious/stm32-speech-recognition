@@ -4,10 +4,19 @@
 [ML on MCU](https://www.vvz.ethz.ch/Vorlesungsverzeichnis/lerneinheit.view?semkez=2024S&ansicht=KATALOGDATEN&lerneinheitId=176625&lang=en) Demo Project
 
 This uses the [TensorFlow Lite for Microcontrollers](https://github.com/tensorflow/tflite-micro/)
-framework to perform simple keyword recognition of "YES" and "NO" on an STM32L475VGT
+framework to perform simple keyword recognition on an STM32L475VGT
 B-L745E-IOT01A2 development board.
+It can detect "Yes", "No", "Up", "Down", "Left" and "Right". It is
+trained on the [speech_commands](https://huggingface.co/datasets/google/speech_commands)
+dataset by P. Warden.
 
 :warning: Make sure you clone the repository with `--recursive`, as it contains submodules.
+
+## Progress
+- [x] Model running on PC using Tensorflow and TFLite
+- [x] Model running on STM32 using TFLite runtime
+- [x] STFT preprocessing ported to STM32
+- [ ] PDM Microphone readout on STM32
 
 ## Dependencies
 You only need some essentials and the `arm-none-eabi` toolchain.
@@ -24,6 +33,7 @@ and is probably not worth the trouble.
 
 ## Model Training
 Create a virtual environment and install the python dependencies
+
 ~~~
 cd ml
 python -m venv venv
@@ -53,13 +63,14 @@ cmake -B build && make -C build
 ~~~
 
 ## Upload
-To upload the compiled binary to the board, you can either use
+To upload the compiled binary (`demo.elf`) to the board, you can either use
 [st-util](https://github.com/stlink-org/stlink), STM32CubeIDE,
 or any other SWD programmer (e.g., SEGGER j-link with Ozone).
 
 ## Evaluation
 To evaluate the performance of the model running on the microcontroller,
 there are some helper scripts in `tools`. These scripts automatically
-send waveforms from the test set to the STM32 over UART, where the inference
-is triggered. Once it completes, the prediction is sent back and stored
-in `log.csv` along with some other helpful information.
+send waveforms from the test set to the STM32 over UART, convert and plot
+various things. With the `-DPRINT_SPECTROGRAM` build flag spectrograms can be
+obtained from the microcontroller. Please note that these scripts are somewhat
+experimental, i.e., they might be adapted to work on your system.

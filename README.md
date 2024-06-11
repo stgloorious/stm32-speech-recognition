@@ -32,6 +32,12 @@ in a single column of the spectrum.
 
 Then, this 124 x 129 spectrogram is fed into a neural network,
 which was previously trained using the TensorFlow framework.
+The model consists of a simple convolutional and dense neural network,
+and was quantized to only use integers to speed up to inference time on
+the resource-constrained microcontroller.
+After training, the model is converted to a TFlite model, which
+can run on top of the TFLite runtime
+on the STM32.
 
 ## Dependencies
 You only need some essentials and the `arm-none-eabi` toolchain.

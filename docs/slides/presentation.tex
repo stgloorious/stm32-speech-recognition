@@ -224,7 +224,7 @@ $\mathbf{STFT}\{x[n]\}(m,\omega)\equiv X(m,\omega) =
 		\draw[visible on=<6->] (dense.east)--(yes.west);
 		\node[draw, thick,anchor=west,visible on=<6->] at (8.5, -1.5)(yes){LEFT};
 		\draw[visible on=<6->] (dense.east)--(yes.west);
-		\node[draw, thick,anchor=west,visible on=<6->] at (8.5, -2.5)(yes){YES};
+		\node[draw, thick,anchor=west,visible on=<6->] at (8.5, -2.5)(yes){RIGHT};
 		\draw[visible on=<6->] (dense.east)--(yes.west);
 
 	\end{tikzpicture}
@@ -311,6 +311,25 @@ $\mathbf{STFT}\{x[n]\}(m,\omega)\equiv X(m,\omega) =
 \end{frame}
 
 \section{Demo}
+\begin{frame}{Demo Project}
+\begin{minipage}{0.49\textwidth}
+	\setbeamercolor{local structure}{fg=mygreen}
+	\setbeamercovered{transparent}
+	\begin{itemize}
+		\item<2->Not dependent on CubeIDE
+		\item<3->Easy to reproduce, CMake-based build
+		\item<4->CI Pipeline
+		\item<5->Dependencies cleanly separated in Git submodules
+	\end{itemize}
+	\end{minipage}
+	\begin{minipage}{0.49\textwidth}
+		\centering
+	\includegraphics[width=\textwidth]{figures/github.png}
+	\includegraphics[width=0.5\textwidth]{figures/qrcode.png}
+	\end{minipage}
+
+\end{frame}
+
 \begin{frame}{Demo}
 	\begin{tikzpicture}[thick]
 		\node[fill=black!10, rounded corners,

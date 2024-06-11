@@ -1,8 +1,6 @@
 # Speech Recognition on STM32 using Machine Learning
 ![build status](https://github.com/stgloorious/stm32-speech-recognition/actions/workflows/cmake-single-platform.yml/badge.svg)
 
-![title picture](docs/assets/title.png)
-
 [ML on MCU](https://www.vvz.ethz.ch/Vorlesungsverzeichnis/lerneinheit.view?semkez=2024S&ansicht=KATALOGDATEN&lerneinheitId=176625&lang=en) Demo Project
 
 This uses the [TensorFlow Lite for Microcontrollers](https://github.com/tensorflow/tflite-micro/)
@@ -11,6 +9,8 @@ B-L745E-IOT01A2 development board.
 It can detect "yes", "no", "up", "down", "left" and "right". It is
 trained on the [speech_commands](https://huggingface.co/datasets/google/speech_commands)
 dataset by P. Warden.
+
+![title picture](docs/assets/title.png)
 
 :warning: Make sure you clone the repository with `--recursive`, as it contains submodules.
 
@@ -96,4 +96,4 @@ obtained from the microcontroller. Please note that these scripts are somewhat
 experimental, i.e., they might be adapted to work on your system.
 
 Currently, the overall accuracy is about 80%.
-![confusion matrix](docs/slides/figures/confusion_matrix.png)
+![confusion matrix](docs/slides/figures/confusion.png)

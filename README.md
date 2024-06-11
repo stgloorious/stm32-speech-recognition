@@ -1,12 +1,14 @@
 # Speech Recognition on STM32 using Machine Learning
 ![build status](https://github.com/stgloorious/stm32-speech-recognition/actions/workflows/cmake-single-platform.yml/badge.svg)
 
+![title picture](docs/assets/title.png)
+
 [ML on MCU](https://www.vvz.ethz.ch/Vorlesungsverzeichnis/lerneinheit.view?semkez=2024S&ansicht=KATALOGDATEN&lerneinheitId=176625&lang=en) Demo Project
 
 This uses the [TensorFlow Lite for Microcontrollers](https://github.com/tensorflow/tflite-micro/)
 framework to perform simple keyword recognition on an STM32L475VGT
 B-L745E-IOT01A2 development board.
-It can detect "Yes", "No", "Up", "Down", "Left" and "Right". It is
+It can detect "yes", "no", "up", "down", "left" and "right". It is
 trained on the [speech_commands](https://huggingface.co/datasets/google/speech_commands)
 dataset by P. Warden.
 
@@ -17,6 +19,19 @@ dataset by P. Warden.
 - [x] Model running on STM32 using TFLite runtime
 - [x] STFT preprocessing ported to STM32
 - [ ] PDM Microphone readout on STM32
+
+## How does it work?
+The model running on the microcontroller is able to classify recordings
+of spoken keywords into 6 classes: yes, no, up, down, left and right.
+For this, a short-time fourier transform is applied
+to the input waveform. This is achieved by taking a fixed-size window
+of the signal, multiplying it by a Hanning window function and then
+applying an FFT to the result. The output of the FFT results
+in a single column of the spectrum.
+![overview](docs/slides/figures/stft.png)
+
+Then, this 124 x 129 spectrogram is fed into a neural network,
+which was previously trained using the TensorFlow framework.
 
 ## Dependencies
 You only need some essentials and the `arm-none-eabi` toolchain.
@@ -68,9 +83,17 @@ To upload the compiled binary (`demo.elf`) to the board, you can either use
 or any other SWD programmer (e.g., SEGGER j-link with Ozone).
 
 ## Evaluation
+Currently, there is no support for reading out the on-board microphone,
+so a waveform needs to be sent from the computer.
+
+![overview](docs/assets/overview.png)
+
 To evaluate the performance of the model running on the microcontroller,
 there are some helper scripts in `tools`. These scripts automatically
 send waveforms from the test set to the STM32 over UART, convert and plot
 various things. With the `-DPRINT_SPECTROGRAM` build flag spectrograms can be
 obtained from the microcontroller. Please note that these scripts are somewhat
 experimental, i.e., they might be adapted to work on your system.
+
+Currently, the overall accuracy is about 80%.
+![confusion matrix](docs/slides/figures/confusion_matrix.png)

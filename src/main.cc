@@ -44,7 +44,9 @@ int dfsdm_conversion_done;
 const int kTensorArenaSize = 66800;
 alignas(16) static uint8_t tensor_arena[kTensorArenaSize];
 
-static uint8_t waveform[16128];
+#define WAVEFORM_BUFFER_SIZE 16128
+uint32_t waveform_len = WAVEFORM_BUFFER_SIZE;
+uint8_t waveform[WAVEFORM_BUFFER_SIZE];
 static uint8_t last_ffts[125];
 
 #define DEBUG_PRINTF(...)            \
@@ -126,12 +128,11 @@ int main(int argc, char *argv[])
 {
 	tflite::InitializeTarget();
 	speech::mic microphone;
-	/*	microphone.init();
+	microphone.init(waveform, waveform_len);
 
 	while (!dfsdm_conversion_done)
 		;
 	microphone.dump_recording();
-*/
 
 	const static uint32_t window_size = 256;
 	const static uint32_t frame_step = 128;
@@ -191,9 +192,17 @@ int main(int argc, char *argv[])
 	DEBUG_PRINTF("MicroInterpreter tensors allocated.\n");
 
 	while (1) {
-		uint32_t waveform_len = serial_recv((char*)waveform, sizeof(waveform));
+#ifdef UART_INPUT
+		waveform_len = serial_recv((char*)waveform, sizeof(waveform));
 		if (waveform_len == 0) {
 			assert(!"Transfer failed.");
+		}
+#else
+
+#endif
+
+		for (int i = 0; i < 16000; i++){
+			printf("%u\n", waveform[i]);
 		}
 
 		float min = 999999.0f;
@@ -303,7 +312,9 @@ int main(int argc, char *argv[])
 		}
 #endif
 
+#ifdef TIMING
 		size_t start_time = HAL_GetTick();
+#endif
 		// Prepare input tensor
 		TfLiteTensor *input = interpreter.input(0);
 		input->dims->size = 4;
@@ -315,10 +326,10 @@ int main(int argc, char *argv[])
 		const char input_name[] = "Input";
 		input->name = input_name;
 		memcpy(input->data.uint8, input_tensor, input->bytes);
-		print_shape(input);
+		//print_shape(input);
 
 		// Perform inference
-		DEBUG_PRINTF("Running inference...\n");
+		//DEBUG_PRINTF("Running inference...\n");
 		if (interpreter.Invoke() != kTfLiteOk) {
 			assert(!"Inference failed.\n");
 		}
@@ -327,22 +338,23 @@ int main(int argc, char *argv[])
 		TfLiteTensor *output = interpreter.output(0);
 		const char output_name[] = "Output";
 		output->name = output_name;
+#ifdef TIMING
 		size_t end_time = HAL_GetTick();
+#endif
+		//DEBUG_PRINTF("Time: #%08u\n", end_time - start_time);
 
-		DEBUG_PRINTF("Time: #%08u\n", end_time - start_time);
-
-		print_shape(output);
+		//print_shape(output);
 		const char* labels[] = {"DOWN", "LEFT", "NO", "RIGHT", "UP", "YES"};
 
 		uint32_t pred = sizeof(labels);
 		uint32_t max_val = 0;
 		for (int32_t i = 0; i < output->dims->data[1]; i++){
-			SUCCESS_PRINTF("Prediction %s: %u\n", labels[i], output->data.uint8[i]);
+			printf("%s:%03u  ", labels[i], output->data.uint8[i]);
 			if (output->data.uint8[i] > max_val){
 				max_val = output->data.uint8[i];
 				pred = i;
 			}
 		}
-		SUCCESS_PRINTF("@%s\n", labels[pred]);
+		printf("@%s\n", labels[pred]);
 	}
 }

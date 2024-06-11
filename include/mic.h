@@ -32,11 +32,11 @@
 namespace speech
 {
 class mic {
-	int32_t *buf;
-	size_t buf_size = 8000;
+	int8_t *buf;
+	size_t buf_size;
 
     public:
-	void init();
+	void init(uint8_t* buf, size_t bufsize);
 	void dump_recording();
 };
 };

@@ -44,17 +44,14 @@ extern "C" {
 #include "error.h"
 }
 
-void speech::mic::init()
+void speech::mic::init(uint8_t *buf, size_t bufsize)
 {
 	dma_init();
 	dfsdm_init();
-	this->buf = (int32_t *)malloc(this->buf_size * sizeof(int32_t));
-	if (this->buf == NULL) {
-		ERR("malloc failed.\n");
-	}
+	this->buf = (int8_t*)buf;
+	this->buf_size = bufsize;
 
-	if (HAL_DFSDM_FilterRegularStart_DMA(&hdfsdm1_filter0, this->buf,
-					     this->buf_size) != HAL_OK) {
+	if (HAL_DFSDM_FilterRegularStart_IT(&hdfsdm1_filter0) != HAL_OK) {
 		ERR("Failed to start conversion.\n");
 	}
 }
@@ -62,6 +59,6 @@ void speech::mic::init()
 void speech::mic::dump_recording()
 {
 	for (size_t i = 0; i < this->buf_size; i++) {
-		printf("%li\n", this->buf[i]);
+		printf("%d\n", this->buf[i]);
 	}
 }

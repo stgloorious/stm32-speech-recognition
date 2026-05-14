@@ -34,7 +34,7 @@ seed = 42
 tf.random.set_seed(seed)
 np.random.seed(seed)
 
-DATASET_PATH = 'data/mini_speech_commands'
+DATASET_PATH = os.path.join('data', 'mini_speech_commands_extracted', 'mini_speech_commands')
 
 keywords = ['yes', 'no', 'left', 'right', 'up', 'down']
 

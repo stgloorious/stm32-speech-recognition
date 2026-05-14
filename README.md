@@ -10,7 +10,8 @@ dataset by P. Warden.
 
 ![title picture](docs/assets/title.png)
 
-[ML on MCU](https://www.vvz.ethz.ch/Vorlesungsverzeichnis/lerneinheit.view?semkez=2024S&ansicht=KATALOGDATEN&lerneinheitId=176625&lang=en) Demo Project
+[ML on MCU](https://www.vvz.ethz.ch/Vorlesungsverzeichnis/lerneinheit.view?semkez=2024S&ansicht=KATALOGDATEN&lerneinheitId=176625&lang=en) Demo Project.
+See also my more recent [RP2350 variant on Zephyr](https://github.com/stgloorious/rpi-pico2-litert).
 
 :warning: Make sure you clone the repository with `--recursive`, as it contains submodules.
 
